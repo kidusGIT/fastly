@@ -7,7 +7,8 @@ export const DOM_TYPES = {
 };
 
 function h(tag, attrs = {}, events = {}, children = [], index = 0) {
-  const type = DOM_TYPES.ELEMENT;
+  const type =
+    typeof tag === "string" ? DOM_TYPES.ELEMENT : DOM_TYPES.COMPONENT;
   return {
     tag,
     attrs,

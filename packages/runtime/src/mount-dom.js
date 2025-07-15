@@ -1,4 +1,5 @@
 import { DOM_TYPES } from "./h.js";
+import { assignAttributes } from "./utils/attributes.js";
 import { addEventListeners } from "./utils/events.js";
 
 function insert(el, parentEl, index) {
@@ -20,7 +21,7 @@ function insert(el, parentEl, index) {
   }
 }
 
-export function mountDOM(vdom, parentEl) {
+export function mountDOM(vdom, parentEl, index) {
   switch (vdom.type) {
     case DOM_TYPES.TEXT:
       createTextNode(vdom, parentEl);
@@ -30,6 +31,9 @@ export function mountDOM(vdom, parentEl) {
       break;
     case DOM_TYPES.FRAGMENT:
       createFragmentNode(vdom, parentEl);
+      break;
+    case DOM_TYPES.COMPONENT:
+      createComponentNode(vdom, parentEl, index);
       break;
 
     default: {
@@ -54,6 +58,7 @@ function createElementNode(vdom, parentEl, index) {
   addEventListeners(element, events);
 
   // setting attributes
+  assignAttributes(element, attrs);
 
   vdom.el = element;
 
@@ -66,4 +71,10 @@ function createFragmentNode(vdom, parentEl, index) {
   vdom.el = parentEl;
 
   children.forEach((child) => mountDOM(child, parentEl));
+}
+
+function createComponentNode(vdom, parentEl, index) {
+  const { tag: component } = vdom;
+  component.mount(parentEl, index);
+  vdom.el = component.firstElement;
 }

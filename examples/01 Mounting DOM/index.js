@@ -2,6 +2,7 @@ import {
   createElement,
   mountDOM,
   destroyDOM,
+  Component,
 } from "../../packages/runtime/src/index.js";
 
 const app = document.getElementById("app");
@@ -24,24 +25,73 @@ const header = createElement("div", {
   ],
 });
 
-const vdom = createElement([
-  header,
-  createElement("hr"),
-  createElement("div", {
-    children: [
-      createElement("h2", {
-        children: ["Hello world"],
+// mountDOM(vdom, app);
+
+class SubItem extends Component {
+  render() {
+    return createElement("button", {
+      children: ["val"],
+    });
+  }
+}
+
+class ItemList extends Component {
+  constructor(number) {
+    super();
+    this.number = number;
+  }
+
+  render() {
+    return createElement("div", {
+      attrs: {
+        class: "sub-item",
+      },
+      children: [
+        createElement("span", {
+          children: [`Hello world ${this.number}`],
+        }),
+        createElement(new SubItem()),
+      ],
+    });
+  }
+}
+
+class HeaderComponent extends Component {
+  count = 15;
+  itemNumbers = [1, 3, 4, 6];
+
+  render() {
+    return createElement([
+      createElement("div", {
+        children: [
+          createElement("h3", {
+            children: [`Hello world ${this.count}`],
+          }),
+          createElement("button", {
+            events: {
+              click: () => {
+                this.setState(() => (this.count += 5));
+              },
+            },
+            children: ["Hi"],
+          }),
+        ],
       }),
-      createElement("button", {
-        events: {
-          click: () => destroyDOM(header),
+      createElement("hr"),
+      //   createElement(
+      //     this.itemNumbers.map((num) => createElement(new ItemList(num)))
+      //   ),
+      createElement("div", {
+        attrs: {
+          class: "flex",
         },
-        children: ["Hi"],
+        children: this.itemNumbers.map((num) =>
+          createElement(new ItemList(num))
+        ),
       }),
-    ],
-  }),
-]);
+    ]);
+  }
+}
 
-console.log(vdom);
-
-mountDOM(vdom, app);
+const head = new HeaderComponent();
+head.mount(app);
