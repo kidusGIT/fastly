@@ -6,7 +6,7 @@ export const DOM_TYPES = {
   SLOT: "slot",
 };
 
-export function h(tag, attrs = {}, events = {}, children = [], index = 0) {
+function h(tag, attrs = {}, events = {}, children = [], index = 0) {
   const type = DOM_TYPES.ELEMENT;
   return {
     tag,
@@ -31,11 +31,11 @@ function mapTextNodes(children = []) {
   });
 }
 
-export function hString(value, index) {
+function hString(value, index) {
   return { type: DOM_TYPES.TEXT, value, index };
 }
 
-export function hFragment(vNodes) {
+function hFragment(vNodes) {
   return {
     type: DOM_TYPES.FRAGMENT,
     children: mapTextNodes(vNodes),
@@ -59,7 +59,10 @@ export function extractChildren(vdom) {
   return children;
 }
 
-export function createElement(tag, props = {}) {
+export function createElement(
+  tag,
+  props = { events: {}, attrs: {}, children: [] }
+) {
   if (Array.isArray(tag)) {
     return hFragment(tag);
   }

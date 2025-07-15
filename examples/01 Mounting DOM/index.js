@@ -1,21 +1,31 @@
-import { createElement, mountDOM } from "../../packages/runtime/src/index.js";
+import {
+  createElement,
+  mountDOM,
+  destroyDOM,
+} from "../../packages/runtime/src/index.js";
 
 const app = document.getElementById("app");
 
+function destroy() {
+  console.log("destroy");
+}
+
+const header = createElement("div", {
+  children: [
+    createElement("h1", {
+      children: ["Hello"],
+    }),
+    createElement("button", {
+      events: {
+        click: destroy,
+      },
+      children: ["click the button"],
+    }),
+  ],
+});
+
 const vdom = createElement([
-  createElement("div", {
-    children: [
-      createElement("h1", {
-        children: ["Hello"],
-      }),
-      createElement("button", {
-        events: {
-          click: () => console.log("clicked"),
-        },
-        children: ["click the button"],
-      }),
-    ],
-  }),
+  header,
   createElement("hr"),
   createElement("div", {
     children: [
@@ -24,7 +34,7 @@ const vdom = createElement([
       }),
       createElement("button", {
         events: {
-          click: () => console.log("hi"),
+          click: () => destroyDOM(header),
         },
         children: ["Hi"],
       }),
