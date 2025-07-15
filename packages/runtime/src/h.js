@@ -19,7 +19,7 @@ export function h(tag, attrs = {}, events = {}, children = [], index = 0) {
 }
 
 function mapTextNodes(children = []) {
-  return children.map((child) => {
+  return children.map((child, index) => {
     if (child === null) {
       return;
     } else if (typeof child === "string") {
@@ -59,10 +59,11 @@ export function extractChildren(vdom) {
   return children;
 }
 
-export function createElement(tag, { events: {}, attrs: {}, children: [] }) {
+export function createElement(tag, props = {}) {
   if (Array.isArray(tag)) {
     return hFragment(tag);
   }
 
+  const { events, attrs, children } = props;
   return h(tag, attrs, events, children);
 }
