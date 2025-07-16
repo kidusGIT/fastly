@@ -9,7 +9,7 @@ import {
 } from "./utils/attributes.js";
 import { objectDiff } from "./utils/objects.js";
 import { assignEventListener } from "./utils/events.js";
-import { arraysDiff } from "./utils/arrays.js";
+import { ARRAY_DIFF_OP, arraysDiff } from "./utils/arrays.js";
 
 function isNotEmptyString(str) {
   return str !== "";
@@ -78,10 +78,10 @@ export function patchDOM(oldVdom, newVdom, parentEl) {
       patchComponent(oldVdom, newVdom);
       break;
     }
-
-    default:
-      break;
   }
+
+  patchChildren(oldVdom, newVdom);
+  return newVdom;
 }
 
 function patchText(oldVdom, newVdom) {
@@ -99,6 +99,55 @@ function patchComponent(oldVdom, newVdom) {
 
   newVdom.tag = component;
   newVdom.el = component.firstElement;
+}
+
+function patchChildren(oldVdom, newVdom, hostComponent) {
+  const oldChildren = extractChildren(oldVdom);
+  const newChildren = extractChildren(newVdom);
+  const parentEl = oldVdom.el;
+
+  const diffSeq = arraysDiffSequence(oldChildren, newChildren, areNodesEqual);
+
+  for (const operation of diffSeq) {
+    const { originalIndex, index, item } = operation;
+    const offset = hostComponent?.offset ?? 0;
+
+    switch (operation.op) {
+      case ARRAY_DIFF_OP.ADD: {
+        mountDOM(item, parentEl, index + offset, hostComponent);
+        break;
+      }
+
+      case ARRAY_DIFF_OP.REMOVE: {
+        destroyDOM(item);
+        break;
+      }
+
+      case ARRAY_DIFF_OP.MOVE: {
+        const oldChild = oldChildren[originalIndex];
+        const newChild = newChildren[index];
+        const el = oldChild.el;
+        const elAtTargetIndex = parentEl.childNodes[index];
+
+        parentEl.insertBefore(el, elAtTargetIndex);
+        // then patch the children of the moved element
+        patchDOM(oldChild, newChild, parentEl, hostComponent);
+
+        break;
+      }
+
+      case ARRAY_DIFF_OP.NOOP: {
+        // then patch the children of the moved element
+        patchDOM(
+          oldChildren[originalIndex],
+          newChildren[index],
+          parentEl,
+          hostComponent
+        );
+        break;
+      }
+    }
+  }
 }
 
 function patchElement(oldVdom, newVdom) {
