@@ -75,11 +75,6 @@ class HeaderComponent extends Component {
   count = 15;
   itemNumbers = [1, 3, 4, 6];
 
-  // constructor() {
-  //   super();
-  //   this.updateState = this.updateState.bind(this);
-  // }
-
   updateState(index) {
     this.setState(() => {
       console.log(index);
