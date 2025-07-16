@@ -56,7 +56,6 @@ class ItemList extends Component {
 
     const setEditable = () => {
       this.isEdit = !this.isEdit;
-      // console.log("isEdit: ", this.isEdit);
       this.setState();
     };
 
