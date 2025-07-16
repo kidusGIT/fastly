@@ -2,6 +2,16 @@ import { destroyDOM } from "./destroy-dom.js";
 import { DOM_TYPES, extractChildren } from "./h.js";
 import { mountDOM } from "./mount-dom.js";
 
+function autoBind(instance) {
+  Object.getOwnPropertyNames(Object.getPrototypeOf(instance)).forEach(
+    (method) => {
+      if (typeof instance[method] === "function" && method !== "constructor") {
+        instance[method] = instance[method].bind(instance);
+      }
+    }
+  );
+}
+
 export class Component {
   #isMounted = false;
   #vdom = null;
@@ -14,6 +24,7 @@ export class Component {
         "Please provide valid implementation for the 'render' method."
       );
     }
+    autoBind(this);
   }
 
   get firstElement() {

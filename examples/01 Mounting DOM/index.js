@@ -25,20 +25,35 @@ const header = createElement("div", {
   ],
 });
 
+//   createElement(
+//     this.itemNumbers.map((num) => createElement(new ItemList(num)))
+//   ),
+
 // mountDOM(vdom, app);
 
 class SubItem extends Component {
+  constructor(updateState, i) {
+    super();
+    this.index = i;
+    this.updateState = updateState;
+  }
+
   render() {
     return createElement("button", {
+      events: {
+        click: () => this.updateState(this.index),
+      },
       children: ["val"],
     });
   }
 }
 
 class ItemList extends Component {
-  constructor(number) {
+  constructor(number, updateState, i) {
     super();
     this.number = number;
+    this.index = i;
+    this.updateState = updateState;
   }
 
   render() {
@@ -50,7 +65,7 @@ class ItemList extends Component {
         createElement("span", {
           children: [`Hello world ${this.number}`],
         }),
-        createElement(new SubItem()),
+        createElement(new SubItem(this.updateState, this.index)),
       ],
     });
   }
@@ -59,6 +74,18 @@ class ItemList extends Component {
 class HeaderComponent extends Component {
   count = 15;
   itemNumbers = [1, 3, 4, 6];
+
+  // constructor() {
+  //   super();
+  //   this.updateState = this.updateState.bind(this);
+  // }
+
+  updateState(index) {
+    this.setState(() => {
+      console.log(index);
+      this.itemNumbers.splice(index, 1);
+    });
+  }
 
   render() {
     return createElement([
@@ -78,15 +105,12 @@ class HeaderComponent extends Component {
         ],
       }),
       createElement("hr"),
-      //   createElement(
-      //     this.itemNumbers.map((num) => createElement(new ItemList(num)))
-      //   ),
       createElement("div", {
         attrs: {
           class: "flex",
         },
-        children: this.itemNumbers.map((num) =>
-          createElement(new ItemList(num))
+        children: this.itemNumbers.map((num, i) =>
+          createElement(new ItemList(num, this.updateState, i))
         ),
       }),
     ]);

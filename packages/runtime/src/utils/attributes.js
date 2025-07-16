@@ -10,6 +10,10 @@ export function assignAttributes(el, attrs) {
       addStyle(el, name, value);
     });
   }
+
+  for (const [name, value] of Object.entries(otherAttrs)) {
+    setAttribute(el, name, value);
+  }
 }
 
 function setClass(el, className) {
