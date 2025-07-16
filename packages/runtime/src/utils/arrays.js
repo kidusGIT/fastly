@@ -1,5 +1,3 @@
-import { h, hFragment } from "../h.js";
-
 export const ARRAY_DIFF_OP = {
   ADD: "add",
   REMOVE: "remove",

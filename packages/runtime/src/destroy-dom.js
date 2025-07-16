@@ -19,7 +19,7 @@ export function destroyDOM(vdom) {
       break;
     }
     case DOM_TYPES.COMPONENT: {
-      const component = vdom.tag;
+      const component = vdom.component;
       component.unmount();
       break;
     }

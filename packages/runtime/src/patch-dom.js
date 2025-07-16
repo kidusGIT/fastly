@@ -1,5 +1,5 @@
 import { destroyDOM } from "./destroy-dom.js";
-import { DOM_TYPES } from "./h.js";
+import { createElement, DOM_TYPES, extractChildren } from "./h.js";
 import { mountDOM } from "./mount-dom.js";
 import {
   addStyle,
@@ -9,7 +9,11 @@ import {
 } from "./utils/attributes.js";
 import { objectDiff } from "./utils/objects.js";
 import { assignEventListener } from "./utils/events.js";
-import { ARRAY_DIFF_OP, arraysDiff } from "./utils/arrays.js";
+import {
+  ARRAY_DIFF_OP,
+  arraysDiff,
+  arraysDiffSequence,
+} from "./utils/arrays.js";
 
 function isNotEmptyString(str) {
   return str !== "";
@@ -21,27 +25,15 @@ export function areNodesEqual(nodeOne, nodeTwo) {
   }
 
   if (nodeOne.type === DOM_TYPES.ELEMENT) {
-    const {
-      tag: tagOne,
-      props: { key: keyOne },
-    } = nodeOne;
-    const {
-      tag: tagTwo,
-      props: { key: keyTwo },
-    } = nodeTwo;
+    const { tag: tagOne, key: keyOne } = nodeOne;
+    const { tag: tagTwo, key: keyTwo } = nodeTwo;
 
     return tagOne === tagTwo && keyOne === keyTwo;
   }
 
   if (nodeOne.type === DOM_TYPES.COMPONENT) {
-    const {
-      tag: componentOne,
-      props: { key: keyOne },
-    } = nodeOne;
-    const {
-      tag: componentTwo,
-      props: { key: keyTwo },
-    } = nodeTwo;
+    const { tag: componentOne, key: keyOne } = nodeOne;
+    const { tag: componentTwo, key: keyTwo } = nodeTwo;
 
     return componentOne === componentTwo && keyOne === keyTwo;
   }
@@ -56,6 +48,9 @@ function toClassList(classes = "") {
 }
 
 export function patchDOM(oldVdom, newVdom, parentEl) {
+  // console.log("oldVdom: ", oldVdom);
+  // console.log("newVdom: ", newVdom);
+
   if (!areNodesEqual(oldVdom, newVdom)) {
     const index = oldVdom.index;
 
@@ -95,9 +90,11 @@ function patchText(oldVdom, newVdom) {
 }
 
 function patchComponent(oldVdom, newVdom) {
-  const { tag: component } = oldVdom;
+  const { component } = oldVdom;
+  const { props } = newVdom;
 
-  newVdom.tag = component;
+  component.updateProps(props);
+  newVdom.component = component;
   newVdom.el = component.firstElement;
 }
 
@@ -107,6 +104,10 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
   const parentEl = oldVdom.el;
 
   const diffSeq = arraysDiffSequence(oldChildren, newChildren, areNodesEqual);
+
+  // console.log("diffSeq: ", diffSeq);
+
+  // return;
 
   for (const operation of diffSeq) {
     const { originalIndex, index, item } = operation;
@@ -149,6 +150,66 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
     }
   }
 }
+
+const f1 = createElement([
+  true
+    ? createElement("span", {
+        children: [
+          createElement("input", {}),
+          createElement("button", {
+            events: {
+              click: () => setEditable(),
+            },
+            children: ["cancel"],
+          }),
+        ],
+      })
+    : createElement("span", {
+        children: [
+          createElement("span", {
+            children: [`items list ${2}    `],
+          }),
+
+          createElement("button", {
+            events: {
+              click: () => setEditable(),
+            },
+            children: ["Edit"],
+          }),
+          createElement("button", {
+            children: ["remove"],
+          }),
+        ],
+      }),
+]);
+
+const f2 = createElement([
+  false
+    ? createElement("span", {
+        children: [
+          createElement("input", {}),
+          createElement("button", {
+            children: ["cancel"],
+          }),
+        ],
+      })
+    : createElement("span", {
+        children: [
+          createElement("span", {
+            children: [`items list ${2}    `],
+          }),
+
+          createElement("button", {
+            children: ["Edit"],
+          }),
+          createElement("button", {
+            children: ["remove"],
+          }),
+        ],
+      }),
+]);
+
+// patchChildren(f1, f2);
 
 function patchElement(oldVdom, newVdom) {
   const el = oldVdom.el;

@@ -49,23 +49,58 @@ class SubItem extends Component {
 }
 
 class ItemList extends Component {
-  constructor(number, updateState, i) {
-    super();
-    this.number = number;
-    this.index = i;
-    this.updateState = updateState;
-  }
+  isEdit;
 
   render() {
+    const { index, updateState, count, number } = this.props;
+
+    const setEditable = () => {
+      this.isEdit = !this.isEdit;
+      // console.log("isEdit: ", this.isEdit);
+      this.setState();
+    };
+
     return createElement("div", {
       attrs: {
         class: "sub-item",
       },
       children: [
-        createElement("span", {
-          children: [`Hello world ${this.number}`],
-        }),
-        createElement(new SubItem(this.updateState, this.index)),
+        this.isEdit
+          ? createElement("span", {
+              children: [
+                createElement("input", {
+                  events: {
+                    change: (e) => console.log("value: ", e.target.value),
+                  },
+                }),
+                createElement("button", {
+                  events: {
+                    click: () => setEditable(),
+                  },
+                  children: ["cancel"],
+                }),
+              ],
+            })
+          : createElement("div", {
+              children: [
+                createElement("span", {
+                  children: [`items list ${number + count}    `],
+                }),
+
+                createElement("button", {
+                  events: {
+                    click: () => setEditable(),
+                  },
+                  children: ["Edit"],
+                }),
+                createElement("button", {
+                  events: {
+                    click: () => updateState(index),
+                  },
+                  children: ["remove"],
+                }),
+              ],
+            }),
       ],
     });
   }
@@ -73,18 +108,25 @@ class ItemList extends Component {
 
 class HeaderComponent extends Component {
   count = 15;
-  itemNumbers = [1, 3, 4, 6];
+  itemNumbers = [
+    { k: 1, v: 10 },
+    { k: 3, v: 50 },
+    { k: 4, v: 40 },
+    { k: 8, v: 6 },
+  ];
 
   updateState(index) {
     this.setState(() => {
-      console.log(index);
       this.itemNumbers.splice(index, 1);
     });
   }
 
   render() {
-    return createElement([
+    const vdom = createElement([
       createElement("div", {
+        attrs: {
+          class: "",
+        },
         children: [
           createElement("h3", {
             children: [`Hello world ${this.count}`],
@@ -105,10 +147,20 @@ class HeaderComponent extends Component {
           class: "flex",
         },
         children: this.itemNumbers.map((num, i) =>
-          createElement(new ItemList(num, this.updateState, i))
+          createElement(ItemList, {
+            key: num.k,
+            props: {
+              number: num.v,
+              updateState: this.updateState,
+              count: this.count,
+              index: i,
+            },
+          })
         ),
       }),
     ]);
+
+    return vdom;
   }
 }
 

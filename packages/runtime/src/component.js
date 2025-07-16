@@ -1,6 +1,7 @@
 import { destroyDOM } from "./destroy-dom.js";
 import { DOM_TYPES, extractChildren } from "./h.js";
 import { mountDOM } from "./mount-dom.js";
+import { patchDOM } from "./patch-dom.js";
 
 function autoBind(instance) {
   Object.getOwnPropertyNames(Object.getPrototypeOf(instance)).forEach(
@@ -16,6 +17,7 @@ export class Component {
   #isMounted = false;
   #vdom = null;
   #hostEl = null;
+  #props = {};
   #children = [];
 
   constructor() {
@@ -37,21 +39,28 @@ export class Component {
     return this.#vdom.el;
   }
 
+  get props() {
+    return this.#props;
+  }
+
   get offset() {
     if (this.#vdom.type === DOM_TYPES.FRAGMENT) {
       //   console.log("firstElement", this.firstElement);
-
       return Array.from(this.#hostEl.children).indexOf(this.firstElement);
     }
     return 0;
   }
 
+  updateProps(props = {}, isNotMount = true) {
+    this.#props = props;
+    if (isNotMount) {
+      this.#patch();
+    }
+  }
+
   setState(cb = () => {}) {
     cb();
-    const el = this.#hostEl;
-    this.unmount();
-    this.#vdom = this.render();
-    this.mount(el);
+    this.#patch();
   }
 
   mount(hostEl, index = null) {
@@ -78,5 +87,11 @@ export class Component {
     this.#isMounted = false;
   }
 
-  //   render() {}
+  #patch() {
+    if (!this.#isMounted) {
+      throw new Error("Component is not mounted.");
+    }
+    const el = this.#hostEl;
+    this.#vdom = patchDOM(this.#vdom, this.render(), el);
+  }
 }

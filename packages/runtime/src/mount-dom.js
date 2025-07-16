@@ -74,7 +74,12 @@ function createFragmentNode(vdom, parentEl, index) {
 }
 
 function createComponentNode(vdom, parentEl, index) {
-  const { tag: component } = vdom;
+  const { tag: Component, props } = vdom;
+  // console.log("comp: ", component);
+  const component = new Component();
+  component.updateProps(props, false);
+
   component.mount(parentEl, index);
+  vdom.component = component;
   vdom.el = component.firstElement;
 }

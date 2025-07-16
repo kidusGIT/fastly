@@ -6,14 +6,19 @@ export const DOM_TYPES = {
   SLOT: "slot",
 };
 
-function h(tag, attrs = {}, events = {}, children = [], index = 0) {
+function h(tag, attributes = {}, events = {}, children = [], key, index = 0) {
   const type =
     typeof tag === "string" ? DOM_TYPES.ELEMENT : DOM_TYPES.COMPONENT;
+
+  const { props, attrs } = attributes;
+
   return {
     tag,
-    attrs,
+    attrs: attrs ?? {},
+    props,
     events,
     type,
+    key,
     index,
     children: mapTextNodes(children),
   };
@@ -62,12 +67,14 @@ export function extractChildren(vdom) {
 
 export function createElement(
   tag,
-  props = { events: {}, attrs: {}, children: [] }
+  args = { events: {}, props: {}, attrs: {}, children: [], key: "" }
 ) {
   if (Array.isArray(tag)) {
     return hFragment(tag);
   }
 
-  const { events, attrs, children } = props;
-  return h(tag, attrs, events, children);
+  const { events, props, attrs, children, key } = args;
+  const attributes = { attrs, props };
+
+  return h(tag, attributes, events, children, key);
 }
