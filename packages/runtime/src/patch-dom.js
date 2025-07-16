@@ -74,6 +74,10 @@ export function patchDOM(oldVdom, newVdom, parentEl) {
       patchElement(oldVdom, newVdom);
       break;
     }
+    case DOM_TYPES.COMPONENT: {
+      patchComponent(oldVdom, newVdom);
+      break;
+    }
 
     default:
       break;
@@ -88,6 +92,13 @@ function patchText(oldVdom, newVdom) {
   if (oldText !== newText) {
     el.nodeValue = newText;
   }
+}
+
+function patchComponent(oldVdom, newVdom) {
+  const { tag: component } = oldVdom;
+
+  newVdom.tag = component;
+  newVdom.el = component.firstElement;
 }
 
 function patchElement(oldVdom, newVdom) {
