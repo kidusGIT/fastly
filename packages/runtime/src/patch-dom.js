@@ -9,6 +9,7 @@ import {
 } from "./utils/attributes.js";
 import { objectDiff } from "./utils/objects.js";
 import { assignEventListener } from "./utils/events.js";
+import { arraysDiff } from "./utils/arrays.js";
 
 function isNotEmptyString(str) {
   return str !== "";
@@ -97,6 +98,11 @@ function patchElement(oldVdom, newVdom) {
 
   const { class: newClass, style: newStyle, ...newAttrs } = newVdom.attrs;
   const newEvents = oldVdom.events;
+
+  patchAttrs(el, oldAttrs, newAttrs);
+  patchClass(el, oldClass, newClass);
+  patchStyles(el, oldStyle, newStyle);
+  patchEvents(el, oldEvents, newEvents);
 }
 
 function patchAttrs(el, oldAttrs, newAttrs) {
