@@ -92,6 +92,7 @@ export class Component {
       throw new Error("Component is not mounted.");
     }
     const el = this.#hostEl;
+
     this.#vdom = patchDOM(this.#vdom, this.render(), el);
   }
 }

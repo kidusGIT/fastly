@@ -66,13 +66,20 @@ class ItemList extends Component {
       children: [
         this.isEdit
           ? createElement("span", {
+              key: 12,
               children: [
                 createElement("input", {
+                  key: 12,
+                  attrs: {
+                    placeholder: "Types some thing... ",
+                  },
                   events: {
                     change: (e) => console.log("value: ", e.target.value),
                   },
                 }),
                 createElement("button", {
+                  key: 14,
+
                   events: {
                     click: () => setEditable(),
                   },
@@ -80,19 +87,26 @@ class ItemList extends Component {
                 }),
               ],
             })
-          : createElement("div", {
+          : createElement("span", {
+              key: 12,
               children: [
                 createElement("span", {
-                  children: [`items list ${number + count}    `],
+                  key: 17,
+
+                  children: [`items list ${number + count}`],
                 }),
 
                 createElement("button", {
+                  key: 20,
+
                   events: {
                     click: () => setEditable(),
                   },
                   children: ["Edit"],
                 }),
                 createElement("button", {
+                  key: 236,
+
                   events: {
                     click: () => updateState(index),
                   },
@@ -125,18 +139,43 @@ class HeaderComponent extends Component {
       createElement("div", {
         attrs: {
           class: "",
+          style: {
+            paddingLeft: "10px",
+          },
         },
         children: [
           createElement("h3", {
             children: [`Hello world ${this.count}`],
           }),
-          createElement("button", {
-            events: {
-              click: () => {
-                this.setState(() => (this.count += 5));
+
+          createElement("div", {
+            attrs: {
+              style: {
+                padding: "1px",
+                display: "flex",
+                gap: "10px",
+                alignItems: "center",
               },
             },
-            children: ["Hi"],
+            children: [
+              createElement("button", {
+                events: {
+                  click: () => {
+                    this.setState(() => (this.count -= 5));
+                  },
+                },
+                children: ["Subtract"],
+              }),
+
+              createElement("button", {
+                events: {
+                  click: () => {
+                    this.setState(() => (this.count += 5));
+                  },
+                },
+                children: ["Add"],
+              }),
+            ],
           }),
         ],
       }),

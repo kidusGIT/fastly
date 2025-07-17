@@ -65,7 +65,8 @@ class ArrayOpDiffing {
 
   isRemoval(index) {
     const item = this.#array[index];
-    return this.#getNewItem(item) === null;
+    const newItem = this.#getNewItem(item);
+    return newItem === null;
   }
 
   removeItem(index, isLast = false) {
