@@ -65,11 +65,10 @@ class ItemList extends Component {
       },
       children: [
         this.isEdit
-          ? createElement("span", {
-              key: 12,
+          ? createElement("div", {
+              // key: 15,
               children: [
                 createElement("input", {
-                  key: 12,
                   attrs: {
                     placeholder: "Types some thing... ",
                   },
@@ -78,8 +77,6 @@ class ItemList extends Component {
                   },
                 }),
                 createElement("button", {
-                  key: 14,
-
                   events: {
                     click: () => setEditable(),
                   },
@@ -87,26 +84,20 @@ class ItemList extends Component {
                 }),
               ],
             })
-          : createElement("span", {
-              key: 12,
+          : createElement("div", {
+              // key: 20,
               children: [
                 createElement("span", {
-                  key: 17,
-
                   children: [`items list ${number + count}`],
                 }),
 
                 createElement("button", {
-                  key: 20,
-
                   events: {
                     click: () => setEditable(),
                   },
                   children: ["Edit"],
                 }),
                 createElement("button", {
-                  key: 236,
-
                   events: {
                     click: () => updateState(index),
                   },
