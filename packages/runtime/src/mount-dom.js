@@ -50,7 +50,7 @@ export function mountDOM(vdom, parentEl, index, component = null) {
         throw new Error("Component is required to mount children.");
       }
 
-      injectChildren(vdom, component, parentEl, index);
+      injectChildren(component, parentEl, index);
       break;
     default: {
       throw new Error(`Can't mount DOM of type: ${vdom.type}`);
@@ -93,21 +93,9 @@ function createFragmentNode(vdom, parentEl, index, component = null) {
   getParent(true);
 }
 
-function injectChildren(vdom, component, parentEl, index = null) {
-  const parent = getParent();
-
-  // console.log("component: ", vdom);
-  // console.log("index: ", parent);
+function injectChildren(component, parentEl, index = null) {
   const children = component.children;
   mountDOM(hFragment(children), parentEl, index, component);
-  if (parent) {
-    // parent[vdom.index] = hFragment(children);
-  }
-
-  // parent.splice(vdom.index, 0, ...children);
-
-  // console.log("vdom--: ", component.children);
-  // console.log("parent--: ", getParent());
 }
 
 function createComponentNode(vdom, parentEl, index) {

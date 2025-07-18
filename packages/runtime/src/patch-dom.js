@@ -73,6 +73,10 @@ export function patchDOM(oldVdom, newVdom, parentEl, component = null) {
       patchComponent(oldVdom, newVdom);
       break;
     }
+    case DOM_TYPES.CHILDREN: {
+      console.log("children");
+      break;
+    }
   }
 
   patchChildren(oldVdom, newVdom, component);
@@ -85,9 +89,6 @@ function patchText(oldVdom, newVdom) {
   const { value: newText } = newVdom;
 
   if (oldText !== newText && el) {
-    console.log("oldDom: ", oldVdom);
-    console.log("newDom: ", newVdom);
-
     el.nodeValue = newText;
   }
 }
@@ -95,9 +96,7 @@ function patchText(oldVdom, newVdom) {
 function patchComponent(oldVdom, newVdom) {
   const { component } = oldVdom;
   const { props, children } = newVdom;
-
-  // console.log("oldVdom: ", component);
-  // console.log("newVdom: ", newVdom);
+  if (!component) return;
 
   component.updateProps(props);
   component.children = children;
@@ -116,7 +115,7 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
 
   const diffSeq = arraysDiffSequence(oldChildren, newChildren, areNodesEqual);
 
-  // console.log("diffSeq: ", diffSeq);
+  console.log("diffSeq: ", diffSeq);
 
   // return;
 
@@ -141,8 +140,8 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
         const el = oldChild.el;
         const elAtTargetIndex = parentEl.childNodes[index];
 
-        // console.log("elAtTargetIndex: ", elAtTargetIndex);
-        // console.log("el: ", el);
+        console.log("elAtTargetIndex: ", elAtTargetIndex);
+        console.log("el: ", el);
         // console.log("index: ", index);
         // console.log("before childNodes: ", parentEl.childNodes);
         parentEl.insertBefore(el, elAtTargetIndex);

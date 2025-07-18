@@ -61,7 +61,7 @@ export class Component {
 
   updateProps(props = {}, isNotMount = true) {
     this.#props = props;
-    if (isNotMount) {
+    if (isNotMount && this.#isMounted) {
       this.#patch();
     }
   }
@@ -96,11 +96,13 @@ export class Component {
   }
 
   #patch() {
-    console.log("this", this);
     if (!this.#isMounted) {
       throw new Error("Component is not mounted.");
     }
     const el = this.#hostEl;
+
+    console.log("new: ", this.render());
+    console.log("old: ", this.#vdom);
 
     this.#vdom = patchDOM(this.#vdom, this.render(), el, this);
   }

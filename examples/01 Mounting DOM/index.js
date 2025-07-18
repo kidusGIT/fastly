@@ -61,10 +61,11 @@ class ItemList extends Component {
       },
       children: [
         this.isEdit
-          ? createElement("span", {
+          ? createElement("div", {
               // key: 15,
               children: [
                 createElement("input", {
+                  key: 20,
                   attrs: {
                     placeholder: "Types some thing... ",
                   },
@@ -73,11 +74,14 @@ class ItemList extends Component {
                   },
                 }),
                 createElement("button", {
+                  key: 21,
                   events: {
                     click: () => setEditable(),
                   },
                   children: ["cancel"],
                 }),
+
+                // createElement(CHILDREN, { key: 22 }),
               ],
             })
           : createElement("div", {
@@ -86,7 +90,6 @@ class ItemList extends Component {
                 createElement("span", {
                   children: [`items list ${number + count}`],
                 }),
-
                 createElement("button", {
                   events: {
                     click: () => setEditable(),
@@ -99,7 +102,6 @@ class ItemList extends Component {
                   },
                   children: ["remove"],
                 }),
-                createElement(CHILDREN),
               ],
             }),
       ],
@@ -142,7 +144,6 @@ class HeaderComponent extends Component {
           createElement("h3", {
             children: [`Hello world ${this.count}`],
           }),
-
           createElement("div", {
             attrs: {
               style: {

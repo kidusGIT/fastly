@@ -29,7 +29,6 @@ export function destroyDOM(vdom, component = null) {
       }
 
       const children = component.children;
-      console.log("children: ", children);
       destroyDOM(hFragment(children), component);
       break;
     }
