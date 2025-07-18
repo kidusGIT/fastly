@@ -20,6 +20,14 @@ export class Component {
   #props = {};
   #children = [];
 
+  set children(children = []) {
+    this.#children = children;
+  }
+
+  get children() {
+    return this.#children;
+  }
+
   constructor() {
     if (!this.render) {
       throw new Error(
@@ -69,7 +77,7 @@ export class Component {
     }
 
     this.#vdom = this.render();
-    mountDOM(this.#vdom, hostEl, index);
+    mountDOM(this.#vdom, hostEl, index, this);
 
     this.#hostEl = hostEl;
     this.#isMounted = true;
@@ -80,7 +88,7 @@ export class Component {
       throw new Error("Component is not mounted");
     }
 
-    destroyDOM(this.#vdom);
+    destroyDOM(this.#vdom, this);
 
     this.#vdom = null;
     this.#hostEl = null;
@@ -88,11 +96,12 @@ export class Component {
   }
 
   #patch() {
+    console.log("this", this);
     if (!this.#isMounted) {
       throw new Error("Component is not mounted.");
     }
     const el = this.#hostEl;
 
-    this.#vdom = patchDOM(this.#vdom, this.render(), el);
+    this.#vdom = patchDOM(this.#vdom, this.render(), el, this);
   }
 }

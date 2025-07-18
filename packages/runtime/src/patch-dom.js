@@ -47,15 +47,15 @@ function toClassList(classes = "") {
     : classes.split(" ").filter((str) => isNotEmptyString(str.trim()));
 }
 
-export function patchDOM(oldVdom, newVdom, parentEl) {
+export function patchDOM(oldVdom, newVdom, parentEl, component = null) {
   // console.log("oldVdom: ", oldVdom);
   // console.log("newVdom: ", newVdom);
 
   if (!areNodesEqual(oldVdom, newVdom)) {
     const index = oldVdom.index;
 
-    destroyDOM(oldVdom);
-    mountDOM(newVdom, parentEl, index);
+    destroyDOM(oldVdom, component);
+    mountDOM(newVdom, parentEl, index, component);
     return newVdom;
   }
   newVdom.el = oldVdom.el;
@@ -75,7 +75,7 @@ export function patchDOM(oldVdom, newVdom, parentEl) {
     }
   }
 
-  patchChildren(oldVdom, newVdom);
+  patchChildren(oldVdom, newVdom, component);
   return newVdom;
 }
 
@@ -84,16 +84,24 @@ function patchText(oldVdom, newVdom) {
   const { value: oldText } = oldVdom;
   const { value: newText } = newVdom;
 
-  if (oldText !== newText) {
+  if (oldText !== newText && el) {
+    console.log("oldDom: ", oldVdom);
+    console.log("newDom: ", newVdom);
+
     el.nodeValue = newText;
   }
 }
 
 function patchComponent(oldVdom, newVdom) {
   const { component } = oldVdom;
-  const { props } = newVdom;
+  const { props, children } = newVdom;
+
+  // console.log("oldVdom: ", component);
+  // console.log("newVdom: ", newVdom);
 
   component.updateProps(props);
+  component.children = children;
+
   newVdom.component = component;
   newVdom.el = component.firstElement;
 }
@@ -108,7 +116,7 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
 
   const diffSeq = arraysDiffSequence(oldChildren, newChildren, areNodesEqual);
 
-  console.log("diffSeq: ", diffSeq);
+  // console.log("diffSeq: ", diffSeq);
 
   // return;
 
@@ -123,7 +131,7 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
       }
 
       case ARRAY_DIFF_OP.REMOVE: {
-        destroyDOM(item);
+        destroyDOM(item, hostComponent);
         break;
       }
 
@@ -133,13 +141,13 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
         const el = oldChild.el;
         const elAtTargetIndex = parentEl.childNodes[index];
 
-        console.log("elAtTargetIndex: ", elAtTargetIndex);
-        console.log("el: ", el);
-        console.log("index: ", index);
-        console.log("before childNodes: ", parentEl.childNodes);
+        // console.log("elAtTargetIndex: ", elAtTargetIndex);
+        // console.log("el: ", el);
+        // console.log("index: ", index);
+        // console.log("before childNodes: ", parentEl.childNodes);
         parentEl.insertBefore(el, elAtTargetIndex);
         // then patch the children of the moved element
-        console.log("after childNodes: ", parentEl.childNodes);
+        // console.log("after childNodes: ", parentEl.childNodes);
         patchDOM(oldChild, newChild, parentEl, hostComponent);
         break;
       }

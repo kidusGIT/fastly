@@ -3,13 +3,14 @@ export const DOM_TYPES = {
   ELEMENT: "element",
   FRAGMENT: "fragment",
   COMPONENT: "component",
-  SLOT: "slot",
+  CHILDREN: "children",
 };
+
+export const CHILDREN = DOM_TYPES.CHILDREN;
 
 function h(tag, attributes = {}, events = {}, children = [], key, index = 0) {
   const type =
     typeof tag === "string" ? DOM_TYPES.ELEMENT : DOM_TYPES.COMPONENT;
-
   const { props, attrs } = attributes;
 
   return {
@@ -17,7 +18,7 @@ function h(tag, attributes = {}, events = {}, children = [], key, index = 0) {
     attrs: attrs ?? {},
     props,
     events,
-    type,
+    type: tag === DOM_TYPES.CHILDREN ? DOM_TYPES.CHILDREN : type,
     key,
     index,
     children: mapTextNodes(children),
@@ -41,7 +42,7 @@ function hString(value, index) {
   return { type: DOM_TYPES.TEXT, value, index };
 }
 
-function hFragment(vNodes) {
+export function hFragment(vNodes) {
   return {
     type: DOM_TYPES.FRAGMENT,
     children: mapTextNodes(vNodes),

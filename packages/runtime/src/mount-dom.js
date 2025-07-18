@@ -1,4 +1,4 @@
-import { DOM_TYPES } from "./h.js";
+import { DOM_TYPES, hFragment } from "./h.js";
 import { assignAttributes } from "./utils/attributes.js";
 import { addEventListeners } from "./utils/events.js";
 
@@ -21,21 +21,37 @@ function insert(el, parentEl, index) {
   }
 }
 
-export function mountDOM(vdom, parentEl, index) {
+const parent = [];
+
+function getParent(isPop = false) {
+  if (isPop) {
+    return parent.pop();
+  }
+
+  return parent[parent.length - 1];
+}
+
+export function mountDOM(vdom, parentEl, index, component = null) {
   switch (vdom.type) {
     case DOM_TYPES.TEXT:
       createTextNode(vdom, parentEl);
       break;
     case DOM_TYPES.ELEMENT:
-      createElementNode(vdom, parentEl);
+      createElementNode(vdom, parentEl, index, component);
       break;
     case DOM_TYPES.FRAGMENT:
-      createFragmentNode(vdom, parentEl);
+      createFragmentNode(vdom, parentEl, index, component);
       break;
     case DOM_TYPES.COMPONENT:
       createComponentNode(vdom, parentEl, index);
       break;
+    case DOM_TYPES.CHILDREN:
+      if (component == null) {
+        throw new Error("Component is required to mount children.");
+      }
 
+      injectChildren(vdom, component, parentEl, index);
+      break;
     default: {
       throw new Error(`Can't mount DOM of type: ${vdom.type}`);
     }
@@ -49,7 +65,7 @@ function createTextNode(vdom, parentEl, index) {
   insert(textNode, parentEl);
 }
 
-function createElementNode(vdom, parentEl, index) {
+function createElementNode(vdom, parentEl, index = null, component = null) {
   const { tag, children } = vdom;
   const element = document.createElement(tag);
 
@@ -61,22 +77,44 @@ function createElementNode(vdom, parentEl, index) {
   assignAttributes(element, attrs);
 
   vdom.el = element;
+  parent.push(children);
 
-  children.forEach((child) => mountDOM(child, element));
+  children.forEach((child) => mountDOM(child, element, index, component));
   insert(element, parentEl);
+  getParent(true);
 }
 
-function createFragmentNode(vdom, parentEl, index) {
+function createFragmentNode(vdom, parentEl, index, component = null) {
   const { children } = vdom;
   vdom.el = parentEl;
 
-  children.forEach((child) => mountDOM(child, parentEl));
+  parent.push(children);
+  children.forEach((child) => mountDOM(child, parentEl, index, component));
+  getParent(true);
+}
+
+function injectChildren(vdom, component, parentEl, index = null) {
+  const parent = getParent();
+
+  // console.log("component: ", vdom);
+  // console.log("index: ", parent);
+  const children = component.children;
+  mountDOM(hFragment(children), parentEl, index, component);
+  if (parent) {
+    // parent[vdom.index] = hFragment(children);
+  }
+
+  // parent.splice(vdom.index, 0, ...children);
+
+  // console.log("vdom--: ", component.children);
+  // console.log("parent--: ", getParent());
 }
 
 function createComponentNode(vdom, parentEl, index) {
-  const { tag: Component, props } = vdom;
-  // console.log("comp: ", component);
+  const { tag: Component, props, children } = vdom;
+
   const component = new Component();
+  component.children = children;
   component.updateProps(props, false);
 
   component.mount(parentEl, index);

@@ -1,3 +1,4 @@
+import { CHILDREN } from "../../packages/runtime/src/h.js";
 import {
   createElement,
   mountDOM,
@@ -32,16 +33,11 @@ const header = createElement("div", {
 // mountDOM(vdom, app);
 
 class SubItem extends Component {
-  constructor(updateState, i) {
-    super();
-    this.index = i;
-    this.updateState = updateState;
-  }
-
   render() {
+    const { index, updateState } = this.props;
     return createElement("button", {
       events: {
-        click: () => this.updateState(this.index),
+        click: () => updateState(index),
       },
       children: ["val"],
     });
@@ -65,7 +61,7 @@ class ItemList extends Component {
       },
       children: [
         this.isEdit
-          ? createElement("div", {
+          ? createElement("span", {
               // key: 15,
               children: [
                 createElement("input", {
@@ -103,6 +99,7 @@ class ItemList extends Component {
                   },
                   children: ["remove"],
                 }),
+                createElement(CHILDREN),
               ],
             }),
       ],
@@ -112,6 +109,7 @@ class ItemList extends Component {
 
 class HeaderComponent extends Component {
   count = 15;
+  value = 2;
   itemNumbers = [
     { k: 1, v: 10 },
     { k: 3, v: 50 },
@@ -123,6 +121,12 @@ class HeaderComponent extends Component {
     this.setState(() => {
       this.itemNumbers.splice(index, 1);
     });
+  }
+
+  propFunc(index) {
+    this.value++;
+    console.log("index: ", index);
+    this.setState();
   }
 
   render() {
@@ -166,6 +170,10 @@ class HeaderComponent extends Component {
                 },
                 children: ["Add"],
               }),
+
+              createElement("span", {
+                children: [`Count: ${this.value}`],
+              }),
             ],
           }),
         ],
@@ -175,17 +183,44 @@ class HeaderComponent extends Component {
         attrs: {
           class: "flex",
         },
-        children: this.itemNumbers.map((num, i) =>
+        children: [
           createElement(ItemList, {
-            key: num.k,
+            key: 12,
             props: {
-              number: num.v,
+              number: 12,
               updateState: this.updateState,
               count: this.count,
-              index: i,
+              index: 5,
             },
-          })
-        ),
+            children: [
+              createElement("p", {
+                children: [`Item ${this.value} - ${this.count}`],
+              }),
+              createElement(SubItem, {
+                props: {
+                  index: 15,
+                  updateState: this.propFunc,
+                },
+              }),
+            ],
+          }),
+        ],
+        // children: this.itemNumbers.map((num, i) =>
+        //   createElement(ItemList, {
+        //     key: num.k,
+        //     props: {
+        //       number: num.v,
+        //       updateState: this.updateState,
+        //       count: this.count,
+        //       index: i,
+        //     },
+        //     children: [
+        //       createElement("h1", {
+        //         children: [`Item ${num.k}`],
+        //       }),
+        //     ],
+        //   })
+        // ),
       }),
     ]);
 
