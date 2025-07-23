@@ -16,31 +16,21 @@ export function arraysDiff(oldArray, newArray) {
   };
 }
 
-class ArrayOpDiffing {
+export class ArrayOpDiffing {
   #array = [];
+  #newArray = [];
+
   #equalsFn;
   #oldItems;
   #newItems;
 
-  #oldSetNodes;
-  #newSetNodes;
-
   constructor(oldArray, newArray, equalsFn) {
     this.#array = [...oldArray];
+    this.#newArray = [...newArray];
+
+    console.log("array ", this.#array);
+    console.log("oldArray ", oldArray);
     this.#equalsFn = equalsFn;
-
-    // newArray.forEach((item) => {
-    //   const key = item?.props?.key ?? item?.index;
-    //   this.#newItems[key] = item;
-    // });
-
-    // oldArray.forEach((item) => {
-    //   const key = item?.props?.key ?? item?.index;
-    //   this.#oldItems[key] = item;
-    // });
-
-    this.#oldSetNodes = this.#setNodes(oldArray);
-    this.#newSetNodes = this.#setNodes(newArray);
 
     this.#oldItems = this.#setNodeKey(oldArray);
     this.#newItems = this.#setNodeKey(newArray);
@@ -108,36 +98,13 @@ class ArrayOpDiffing {
     const key = oldItem?.key;
     if (key) {
       const newItem = this.#newItems.get(key) ?? null;
-      if (newItem === null) {
-        return true;
-      }
-
-      // if (this.isNoop(oldItem, newItem)) {
-      //   const op = this.noopItem(newItem, index);
-      //   operations.push(op);
-      // } else {
-      //   const op = this.moveItem(newItem, index);
-      //   operations.push(op);
-      // }
-
-      return false;
+      return newItem === null;
     }
 
     const nodes = this.#newItems.get(oldItem?.tag) ?? [];
     if (Array.isArray(nodes) && nodes.length <= 0) {
-      console.log("tag removed: ", oldItem?.tag);
-      nodes.pop();
       return true;
     }
-    // const moved = nodes.pop();
-
-    // if (this.isNoop(oldItem, moved)) {
-    //   const op = this.noopItem(oldItem, index);
-    //   operations.push(op);
-    // } else {
-    //   const op = this.moveItem(oldItem, index);
-    //   operations.push(op);
-    // }
 
     return false;
   }
@@ -146,41 +113,25 @@ class ArrayOpDiffing {
     return this.#equalsFn(oldItem, newItem);
   }
 
-  isAddition(newItem, index, operations = []) {
+  isAddition(newItem) {
     const key = newItem?.key;
     if (key) {
       const oldItem = this.#oldItems.get(key) ?? null;
-      if (oldItem === null) {
-        return true;
-      }
-
-      // if (this.isNoop(newItem, oldItem)) {
-      //   const op = this.noopItem(oldItem, index);
-      //   operations.push(op);
-      // } else {
-      //   const op = this.moveItem(oldItem, index);
-      //   operations.push(op);
-      // }
-
-      return false;
+      return oldItem;
     }
 
     const nodes = this.#oldItems.get(newItem?.tag) ?? [];
     if (Array.isArray(nodes) && nodes.length === 0) {
-      nodes.pop();
-      return true;
+      return null;
     }
-    // const moved = nodes.pop();
 
-    // if (this.isNoop(newItem, moved)) {
-    //   const op = this.noopItem(newItem, index);
-    //   operations.push(op);
-    // } else {
-    //   const op = this.moveItem(newItem, index);
-    //   operations.push(op);
-    // }
+    return nodes.pop();
+  }
 
-    return false;
+  #setCurrentIndex(item, index) {
+    if (item) {
+      item["currentIndex"] = index;
+    }
   }
 
   removeItem(removeItem, key, isLast = false) {
@@ -191,7 +142,13 @@ class ArrayOpDiffing {
     };
 
     if (!isLast) {
-      this.#oldSetNodes.delete(key);
+      console.log("this.#array before: ", this.#array);
+
+      const lastItem = this.#array.pop();
+      if (this.length > 0) {
+        this.#array[key] = lastItem;
+        this.#setCurrentIndex(lastItem, key);
+      }
     }
 
     return operation;
@@ -209,25 +166,18 @@ class ArrayOpDiffing {
     };
   }
 
-  addItem(item, replacedItem) {
+  addItem(item) {
+    const index = item?.index;
     const operation = {
       op: ARRAY_DIFF_OP.ADD,
-      index: item?.index,
+      index,
       item,
     };
 
-    console.log("index ", item.index);
-    console.log("this.#oldItems ", this.#oldSetNodes);
-    const oldItem = this.#oldSetNodes.get(item.index);
-
-    if (!oldItem) {
-      this.#oldSetNodes.set(item.index, item);
-      return operation;
-    }
-
-    const size = this.#oldSetNodes.size;
-    this.#oldSetNodes.set(item.index, item);
-    this.#oldSetNodes.set(size, oldItem);
+    const replacedItem = this.#array[index];
+    this.#array[index] = item;
+    this.#array.push(replacedItem);
+    this.#setCurrentIndex(replacedItem, this.length - 1);
 
     return operation;
   }
@@ -246,42 +196,35 @@ class ArrayOpDiffing {
     }
   }
 
-  moveItem(item, toItem) {
-    if (item) {
-      return;
-    }
+  moveItem(item, to) {
+    const toIndex = to?.currentIndex ?? to?.index;
+    const fromIndex = item?.currentIndex ?? item?.index;
+    const originalIndex = item?.index;
 
-    // console.log("old", this.#oldSetNodes);
+    const toItem = this.#array[toIndex];
+    this.#array[fromIndex] = toItem;
+    this.#setCurrentIndex(toItem, fromIndex);
 
-    const originalItem = this.#getItem(toItem, this.#oldSetNodes);
-    console.log("toItem: ", toItem);
-
-    if (!originalItem) {
-      throw Error("Invalid operation");
-    }
-
-    const originalIndex = originalItem?.index;
-    const toIndex = toItem?.index;
+    this.#array[toIndex] = item;
+    this.#setCurrentIndex(item, toIndex);
 
     const operation = {
       op: ARRAY_DIFF_OP.MOVE,
       originalIndex,
       from: originalIndex,
-      index: toIndex,
+      index: to?.index,
       item: toItem,
     };
-
-    this.#oldSetNodes.set(originalIndex, item);
-    this.#oldSetNodes.set(toIndex, item);
 
     return operation;
   }
 
   removeItemsAfter(index) {
     const operations = [];
-
+    // console.log("index ", index);
+    // console.log("this.length ", this.#array);
     while (this.length > index) {
-      operations.push(this.removeItem(index, true));
+      operations.push(this.removeItem(this.#array[index], index, true));
       index++;
     }
 
@@ -290,59 +233,29 @@ class ArrayOpDiffing {
 
   diffChildrenArray() {
     const operations = [];
-    let removeCounter = 0;
-    let addCounter = 0;
 
-    this.#newSetNodes.forEach((item, key) => {
-      console.log("key: " + key + " removeCounter ", removeCounter);
-      let oldItem = this.#oldSetNodes.get(key + removeCounter);
-
-      if (oldItem && this.isRemoval(oldItem, key, operations)) {
-        const op = this.removeItem(oldItem, key);
+    console.log("this.#array after: ", this.#array);
+    for (let index = 0; index < this.#newArray.length; index++) {
+      if (this.isRemoval(this.#array[index], index)) {
+        const op = this.removeItem(this.#array[index], index);
         operations.push(op);
+        index--;
+        // console.log("this.#array before: ", this.#array);
+        continue;
+      }
+      let movedItem;
 
-        oldItem = this.#oldSetNodes.get(key + (removeCounter + 1));
-
-        while (oldItem && this.isRemoval(oldItem, key, operations)) {
-          console.log("key+ ", key + removeCounter);
-
-          const op = this.removeItem(
-            this.#oldSetNodes.get(key + removeCounter),
-            key
-          );
-          operations.push(op);
-
-          removeCounter++;
-          oldItem = this.#oldSetNodes.get(key + removeCounter);
-        }
-
-        // return;
+      if ((movedItem = this.isAddition(this.#newArray[index])) == null) {
+        const op = this.addItem(this.#newArray[index], this.#array[index]);
+        operations.push(op);
+        continue;
       }
 
-      if (oldItem && this.isNoop(oldItem, item)) {
-        // console.log("Noop: ", item, ", key: ", key);
-        const op = this.noopItem(oldItem, item);
-        operations.push(op);
-        return;
-      }
+      operations.push(this.moveItem(movedItem, this.#newArray[index]));
+    }
 
-      if (this.isAddition(item)) {
-        // console.log("Add: ", item, ", key: ", key);
-        const op = this.addItem(item, oldItem);
-        operations.push(op);
-        addCounter > 0 && addCounter--;
-        return;
-      }
-      // console.log("item ", item);
-      // console.log("oldItem ", oldItem);
-      this.moveItem(oldItem, item);
-    });
-
-    console.log("old: ", this.#oldSetNodes);
-    console.log("*************");
-    console.log("new: ", this.#newSetNodes);
-    console.log("--------------------------------");
-    console.log("operations: ", operations);
+    operations.push(...this.removeItemsAfter(this.#newArray.length));
+    return operations;
   }
 }
 

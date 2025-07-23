@@ -11,6 +11,7 @@ import { objectDiff } from "./utils/objects.js";
 import { assignEventListener } from "./utils/events.js";
 import {
   ARRAY_DIFF_OP,
+  ArrayOpDiffing,
   arraysDiff,
   arraysDiffSequence,
 } from "./utils/arrays.js";
@@ -110,11 +111,16 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
   const newChildren = extractChildren(newVdom);
   const parentEl = oldVdom.el;
 
-  const diffSeq = arraysDiffSequence(oldChildren, newChildren, areNodesEqual);
+  const arraysDiffSequence = new ArrayOpDiffing(
+    oldChildren,
+    newChildren,
+    areNodesEqual
+  );
+  const diffSeq = arraysDiffSequence.diffChildrenArray();
 
   // console.log("diffSeq: ", diffSeq);
 
-  return;
+  // return;
 
   for (const operation of diffSeq) {
     const { originalIndex, index, item } = operation;
@@ -127,6 +133,7 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
       }
 
       case ARRAY_DIFF_OP.REMOVE: {
+        // console.log("removing: ", item);
         destroyDOM(item, hostComponent);
         break;
       }
@@ -137,8 +144,8 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
         const el = oldChild.el;
         const elAtTargetIndex = parentEl.childNodes[index];
 
-        console.log("elAtTargetIndex: ", elAtTargetIndex);
-        console.log("el: ", el);
+        // console.log("elAtTargetIndex: ", elAtTargetIndex);
+        // console.log("el: ", el);
         // console.log("index: ", index);
         // console.log("before childNodes: ", parentEl.childNodes);
         parentEl.insertBefore(el, elAtTargetIndex);
@@ -148,79 +155,57 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
         break;
       }
 
-      case ARRAY_DIFF_OP.NOOP: {
-        // then patch the children of the moved element
+      // case ARRAY_DIFF_OP.NOOP: {
+      //   // then patch the children of the moved element
 
-        patchDOM(
-          oldChildren[originalIndex],
-          newChildren[index],
-          parentEl,
-          hostComponent
-        );
-        break;
-      }
+      //   patchDOM(
+      //     oldChildren[originalIndex],
+      //     newChildren[index],
+      //     parentEl,
+      //     hostComponent
+      //   );
+      //   break;
+      // }
     }
   }
 }
 
-const f1 = createElement([
-  true
-    ? createElement([
-        createElement("h1", {
-          // key: 10,
-          children: ["Edit"],
-        }),
-        createElement("button", {
-          children: ["cancel"],
-          // key: 11,
-        }),
-      ])
-    : createElement([
-        createElement("span", {
-          children: [`items list ${2}`],
-          // key: 12,
-        }),
+// const f1 = createElement([
+//   createElement([
+//     createElement("input", {
+//       // key: 10,
+//       // children: ["Edit"],
+//     }),
+//     createElement("button", {
+//       children: ["cancel"],
+//       // key: 11,
+//     }),
+//   ]),
+// ]);
 
-        createElement("button", {
-          children: ["Edit"],
-          // key: 13,
-        }),
-        createElement("button", {
-          children: ["remove"],
-          // key: 14,
-        }),
-      ]),
-]);
+// const f2 = createElement([
+//   createElement([
+//     createElement("span", {
+//       children: [`items list ${2}`],
+//       // key: 12,
+//     }),
 
-const f2 = createElement([
-  false
-    ? createElement([
-        createElement("input", {
-          // key: 10
-        }),
-        createElement("button", {
-          children: ["cancel"],
-          // key: 11,
-        }),
-      ])
-    : createElement([
-        createElement("span", {
-          children: [`items list ${2}`],
-          // key: 12,
-        }),
+//     createElement("button", {
+//       children: ["Edit"],
+//       // key: 13,
+//     }),
+//     createElement("button", {
+//       children: ["remove"],
+//       // key: 14,
+//     }),
+//     createElement("input", {
+//       // children: ["remove"],
+//       // key: 10,
+//     }),
+//   ]),
+// ]);
 
-        createElement("button", {
-          children: ["Edit"],
-          // key: 13,
-        }),
-        createElement("h1", {
-          children: ["remove"],
-          // key: 14,
-        }),
-      ]),
-]);
-
-patchChildren(f1, f2);
+// patchChildren(f2, f1);
 
 function patchElement(oldVdom, newVdom) {
   const el = oldVdom.el;
