@@ -100,7 +100,7 @@ class ArrayOpDiffing {
     return this.#newItems[key];
   }
 
-  isRemoval(index) {
+  isRemoval(index, operations = []) {
     const item = this.#oldSetNodes.get(index);
     if (item?.key) {
       const newItem = this.#newItems.get(item?.key) ?? null;
@@ -111,6 +111,8 @@ class ArrayOpDiffing {
     if (Array.isArray(nodes) && nodes.length <= 0) {
       return true;
     }
+
+    // moved
 
     return false;
   }
@@ -129,7 +131,8 @@ class ArrayOpDiffing {
   }
 
   removeItem(index, isLast = false) {
-    const removeItem = this.#array[index];
+    const removeItem = this.#oldSetNodes.get(index);
+
     const operation = {
       op: ARRAY_DIFF_OP.REMOVE,
       index,
