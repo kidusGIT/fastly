@@ -19,22 +19,59 @@ export function arraysDiff(oldArray, newArray) {
 class ArrayOpDiffing {
   #array = [];
   #equalsFn;
-  #oldItems = {};
-  #newItems = {};
+  #oldItems;
+  #newItems;
 
-  constructor(array, oldArray, equalsFn) {
-    this.#array = [...array];
+  #oldSetNodes;
+  #newSetNodes;
+
+  constructor(oldArray, newArray, equalsFn) {
+    this.#array = [...oldArray];
     this.#equalsFn = equalsFn;
 
-    oldArray.forEach((item) => {
-      const key = item?.props?.key ?? item?.index;
-      this.#newItems[key] = item;
+    // newArray.forEach((item) => {
+    //   const key = item?.props?.key ?? item?.index;
+    //   this.#newItems[key] = item;
+    // });
+
+    // oldArray.forEach((item) => {
+    //   const key = item?.props?.key ?? item?.index;
+    //   this.#oldItems[key] = item;
+    // });
+
+    this.#oldSetNodes = this.#setNodes(oldArray);
+    this.#newSetNodes = this.#setNodes(newArray);
+
+    this.#oldItems = this.#setNodeKey(oldArray);
+    this.#newItems = this.#setNodeKey(newArray);
+  }
+
+  #setNodes(items) {
+    const map = new Map();
+    items.forEach((item, index) => {
+      map.set(index, item);
     });
 
-    array.forEach((item) => {
-      const key = item?.props?.key ?? item?.index;
-      this.#oldItems[key] = item;
+    return map;
+  }
+
+  #setNodeKey(items = []) {
+    const map = new Map();
+    items.forEach((item) => {
+      const key = item?.key;
+      if (key) {
+        map.set(key, item);
+      } else {
+        const tag = item?.tag;
+        const nodes = map.get(tag) ?? [];
+        if (Array.isArray(nodes)) {
+          nodes.push(item);
+        }
+        map.set(tag, nodes);
+      }
     });
+
+    return map;
   }
 
   get length() {
@@ -42,7 +79,7 @@ class ArrayOpDiffing {
   }
 
   #getKey(item) {
-    return item?.props?.key ?? item?.index;
+    return item?.key;
   }
 
   #getOldItem(item) {
@@ -64,9 +101,31 @@ class ArrayOpDiffing {
   }
 
   isRemoval(index) {
-    const item = this.#array[index];
-    const newItem = this.#getNewItem(item);
-    return newItem === null;
+    const item = this.#oldSetNodes.get(index);
+    if (item?.key) {
+      const newItem = this.#newItems.get(item?.key) ?? null;
+      return newItem === null;
+    }
+
+    const nodes = this.#newItems.get(item?.tag);
+    if (Array.isArray(nodes) && nodes.length <= 0) {
+      return true;
+    }
+
+    return false;
+  }
+
+  isNoop(index, newItem) {
+    // if (index >= this.length) {
+    //   return false;
+    // }
+
+    const item = this.#oldSetNodes.get(index);
+    return this.#equalsFn(item, newItem);
+  }
+
+  isAddition(item) {
+    return this.#getOldItem(item) === null;
   }
 
   removeItem(index, isLast = false) {
@@ -86,15 +145,6 @@ class ArrayOpDiffing {
     return operation;
   }
 
-  isNoop(index, newItem) {
-    if (index >= this.length) {
-      return false;
-    }
-
-    const item = this.#array[index];
-    return this.#equalsFn(item, newItem);
-  }
-
   noopItem(index) {
     const originalIndex = this.#array[index].index;
 
@@ -104,10 +154,6 @@ class ArrayOpDiffing {
       index,
       item: this.#array[index],
     };
-  }
-
-  isAddition(item) {
-    return this.#getOldItem(item) === null;
   }
 
   addItem(item) {
@@ -151,6 +197,22 @@ class ArrayOpDiffing {
 
     return operations;
   }
+
+  diffChildrenArray() {
+    const operations = [];
+    this.#newSetNodes.forEach((item, key) => {
+      if (this.isRemoval(key)) {
+        // remove it from the old set
+        console.log("remove: ", item, ", key: ", key);
+        return;
+      }
+
+      if (this.isNoop(key, item)) {
+        console.log("Noop: ", item, ", key: ", key);
+        return;
+      }
+    });
+  }
 }
 
 export function arraysDiffSequence(
@@ -160,6 +222,9 @@ export function arraysDiffSequence(
 ) {
   const sequence = [];
   const array = new ArrayOpDiffing(oldArray, newArray, equalsFn);
+
+  array.diffChildrenArray();
+  return;
 
   for (let index = 0; index < newArray.length; index++) {
     const item = newArray[index];

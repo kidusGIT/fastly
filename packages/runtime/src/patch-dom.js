@@ -110,14 +110,11 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
   const newChildren = extractChildren(newVdom);
   const parentEl = oldVdom.el;
 
-  // console.log("oldChildren: ", oldChildren);
-  // console.log("newChildren: ", newChildren);
-
   const diffSeq = arraysDiffSequence(oldChildren, newChildren, areNodesEqual);
 
-  console.log("diffSeq: ", diffSeq);
+  // console.log("diffSeq: ", diffSeq);
 
-  // return;
+  return;
 
   for (const operation of diffSeq) {
     const { originalIndex, index, item } = operation;
@@ -168,63 +165,57 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
 
 const f1 = createElement([
   true
-    ? createElement("span", {
-        children: [
-          createElement("input", {}),
-          createElement("button", {
-            events: {
-              click: () => setEditable(),
-            },
-            children: ["cancel"],
-          }),
-        ],
-      })
-    : createElement("span", {
-        children: [
-          createElement("span", {
-            children: [`items list ${2}    `],
-          }),
+    ? createElement([
+        createElement("input", { key: 10 }),
+        createElement("button", {
+          children: ["cancel"],
+          key: 11,
+        }),
+      ])
+    : createElement([
+        createElement("span", {
+          children: [`items list ${2}`],
+          key: 12,
+        }),
 
-          createElement("button", {
-            events: {
-              click: () => setEditable(),
-            },
-            children: ["Edit"],
-          }),
-          createElement("button", {
-            children: ["remove"],
-          }),
-        ],
-      }),
+        createElement("button", {
+          children: ["Edit"],
+          key: 13,
+        }),
+        createElement("button", {
+          children: ["remove"],
+          key: 14,
+        }),
+      ]),
 ]);
 
 const f2 = createElement([
   false
-    ? createElement("span", {
-        children: [
-          createElement("input", {}),
-          createElement("button", {
-            children: ["cancel"],
-          }),
-        ],
-      })
-    : createElement("span", {
-        children: [
-          createElement("span", {
-            children: [`items list ${2}    `],
-          }),
+    ? createElement([
+        createElement("input", { key: 10 }),
+        createElement("button", {
+          children: ["cancel"],
+          key: 11,
+        }),
+      ])
+    : createElement([
+        createElement("span", {
+          children: [`items list ${2}`],
+          key: 12,
+        }),
 
-          createElement("button", {
-            children: ["Edit"],
-          }),
-          createElement("button", {
-            children: ["remove"],
-          }),
-        ],
-      }),
+        createElement("button", {
+          children: ["Edit"],
+          key: 13,
+        }),
+        createElement("button", {
+          children: ["remove"],
+          key: 14,
+        }),
+      ]),
 ]);
 
-// patchChildren(f1, f2);
+patchChildren(f1, f2);
 
 function patchElement(oldVdom, newVdom) {
   const el = oldVdom.el;
