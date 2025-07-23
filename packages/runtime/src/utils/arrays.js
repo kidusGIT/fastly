@@ -100,93 +100,180 @@ class ArrayOpDiffing {
     return this.#newItems[key];
   }
 
-  isRemoval(index, operations = []) {
-    const item = this.#oldSetNodes.get(index);
-    if (item?.key) {
-      const newItem = this.#newItems.get(item?.key) ?? null;
-      return newItem === null;
+  isRemoval(oldItem, index, operations = []) {
+    if (!oldItem) {
+      return false;
     }
 
-    const nodes = this.#newItems.get(item?.tag);
+    const key = oldItem?.key;
+    if (key) {
+      const newItem = this.#newItems.get(key) ?? null;
+      if (newItem === null) {
+        return true;
+      }
+
+      // if (this.isNoop(oldItem, newItem)) {
+      //   const op = this.noopItem(newItem, index);
+      //   operations.push(op);
+      // } else {
+      //   const op = this.moveItem(newItem, index);
+      //   operations.push(op);
+      // }
+
+      return false;
+    }
+
+    const nodes = this.#newItems.get(oldItem?.tag) ?? [];
     if (Array.isArray(nodes) && nodes.length <= 0) {
+      console.log("tag removed: ", oldItem?.tag);
+      nodes.pop();
       return true;
     }
+    // const moved = nodes.pop();
 
-    // moved
+    // if (this.isNoop(oldItem, moved)) {
+    //   const op = this.noopItem(oldItem, index);
+    //   operations.push(op);
+    // } else {
+    //   const op = this.moveItem(oldItem, index);
+    //   operations.push(op);
+    // }
 
     return false;
   }
 
-  isNoop(index, newItem) {
-    // if (index >= this.length) {
-    //   return false;
+  isNoop(oldItem, newItem) {
+    return this.#equalsFn(oldItem, newItem);
+  }
+
+  isAddition(newItem, index, operations = []) {
+    const key = newItem?.key;
+    if (key) {
+      const oldItem = this.#oldItems.get(key) ?? null;
+      if (oldItem === null) {
+        return true;
+      }
+
+      // if (this.isNoop(newItem, oldItem)) {
+      //   const op = this.noopItem(oldItem, index);
+      //   operations.push(op);
+      // } else {
+      //   const op = this.moveItem(oldItem, index);
+      //   operations.push(op);
+      // }
+
+      return false;
+    }
+
+    const nodes = this.#oldItems.get(newItem?.tag) ?? [];
+    if (Array.isArray(nodes) && nodes.length === 0) {
+      nodes.pop();
+      return true;
+    }
+    // const moved = nodes.pop();
+
+    // if (this.isNoop(newItem, moved)) {
+    //   const op = this.noopItem(newItem, index);
+    //   operations.push(op);
+    // } else {
+    //   const op = this.moveItem(newItem, index);
+    //   operations.push(op);
     // }
 
-    const item = this.#oldSetNodes.get(index);
-    return this.#equalsFn(item, newItem);
+    return false;
   }
 
-  isAddition(item) {
-    return this.#getOldItem(item) === null;
-  }
-
-  removeItem(index, isLast = false) {
-    const removeItem = this.#oldSetNodes.get(index);
-
+  removeItem(removeItem, key, isLast = false) {
     const operation = {
       op: ARRAY_DIFF_OP.REMOVE,
-      index,
+      index: key,
       item: removeItem,
     };
 
     if (!isLast) {
-      const lastItem = this.#array[this.length - 1];
-      this.#array[index] = lastItem;
-      this.#array.pop();
+      this.#oldSetNodes.delete(key);
     }
 
     return operation;
   }
 
-  noopItem(index) {
-    const originalIndex = this.#array[index].index;
+  noopItem(oldItem, newItem) {
+    const originalIndex = oldItem.index;
+    this.#getItem(oldItem, this.#oldItems);
 
     return {
       op: ARRAY_DIFF_OP.NOOP,
       originalIndex,
-      index,
-      item: this.#array[index],
+      index: newItem?.index,
+      item: newItem,
     };
   }
 
-  addItem(item) {
+  addItem(item, replacedItem) {
     const operation = {
       op: ARRAY_DIFF_OP.ADD,
       index: item?.index,
       item,
     };
 
+    console.log("index ", item.index);
+    console.log("this.#oldItems ", this.#oldSetNodes);
+    const oldItem = this.#oldSetNodes.get(item.index);
+
+    if (!oldItem) {
+      this.#oldSetNodes.set(item.index, item);
+      return operation;
+    }
+
+    const size = this.#oldSetNodes.size;
+    this.#oldSetNodes.set(item.index, item);
+    this.#oldSetNodes.set(size, oldItem);
+
     return operation;
   }
 
-  moveItem(item, toIndex) {
-    const i = this.#getOldItem(item);
-    if (i === null) {
+  #getItem(item, map) {
+    const key = item?.key;
+    if (key) {
+      const i = map.get(key);
+      return i;
+    }
+
+    const nodes = map.get(item?.tag) ?? [];
+    if (Array.isArray(nodes)) {
+      const moved = nodes.pop();
+      return moved;
+    }
+  }
+
+  moveItem(item, toItem) {
+    if (item) {
       return;
     }
 
-    const originalIndex = i?.index;
+    // console.log("old", this.#oldSetNodes);
+
+    const originalItem = this.#getItem(toItem, this.#oldSetNodes);
+    console.log("toItem: ", toItem);
+
+    if (!originalItem) {
+      throw Error("Invalid operation");
+    }
+
+    const originalIndex = originalItem?.index;
+    const toIndex = toItem?.index;
 
     const operation = {
       op: ARRAY_DIFF_OP.MOVE,
       originalIndex,
       from: originalIndex,
       index: toIndex,
-      item: item,
+      item: toItem,
     };
 
-    this.#array.splice(i?.index, 1);
-    this.#array.splice(item?.index, 0, item);
+    this.#oldSetNodes.set(originalIndex, item);
+    this.#oldSetNodes.set(toIndex, item);
+
     return operation;
   }
 
@@ -203,18 +290,59 @@ class ArrayOpDiffing {
 
   diffChildrenArray() {
     const operations = [];
+    let removeCounter = 0;
+    let addCounter = 0;
+
     this.#newSetNodes.forEach((item, key) => {
-      if (this.isRemoval(key)) {
-        // remove it from the old set
-        console.log("remove: ", item, ", key: ", key);
+      console.log("key: " + key + " removeCounter ", removeCounter);
+      let oldItem = this.#oldSetNodes.get(key + removeCounter);
+
+      if (oldItem && this.isRemoval(oldItem, key, operations)) {
+        const op = this.removeItem(oldItem, key);
+        operations.push(op);
+
+        oldItem = this.#oldSetNodes.get(key + (removeCounter + 1));
+
+        while (oldItem && this.isRemoval(oldItem, key, operations)) {
+          console.log("key+ ", key + removeCounter);
+
+          const op = this.removeItem(
+            this.#oldSetNodes.get(key + removeCounter),
+            key
+          );
+          operations.push(op);
+
+          removeCounter++;
+          oldItem = this.#oldSetNodes.get(key + removeCounter);
+        }
+
+        // return;
+      }
+
+      if (oldItem && this.isNoop(oldItem, item)) {
+        // console.log("Noop: ", item, ", key: ", key);
+        const op = this.noopItem(oldItem, item);
+        operations.push(op);
         return;
       }
 
-      if (this.isNoop(key, item)) {
-        console.log("Noop: ", item, ", key: ", key);
+      if (this.isAddition(item)) {
+        // console.log("Add: ", item, ", key: ", key);
+        const op = this.addItem(item, oldItem);
+        operations.push(op);
+        addCounter > 0 && addCounter--;
         return;
       }
+      // console.log("item ", item);
+      // console.log("oldItem ", oldItem);
+      this.moveItem(oldItem, item);
     });
+
+    console.log("old: ", this.#oldSetNodes);
+    console.log("*************");
+    console.log("new: ", this.#newSetNodes);
+    console.log("--------------------------------");
+    console.log("operations: ", operations);
   }
 }
 
