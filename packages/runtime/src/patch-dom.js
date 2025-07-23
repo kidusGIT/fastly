@@ -166,25 +166,28 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
 const f1 = createElement([
   true
     ? createElement([
-        createElement("input", { key: 10 }),
+        createElement("h1", {
+          // key: 10,
+          children: ["Edit"],
+        }),
         createElement("button", {
           children: ["cancel"],
-          key: 11,
+          // key: 11,
         }),
       ])
     : createElement([
         createElement("span", {
           children: [`items list ${2}`],
-          key: 12,
+          // key: 12,
         }),
 
         createElement("button", {
           children: ["Edit"],
-          key: 13,
+          // key: 13,
         }),
         createElement("button", {
           children: ["remove"],
-          key: 14,
+          // key: 14,
         }),
       ]),
 ]);
@@ -192,25 +195,27 @@ const f1 = createElement([
 const f2 = createElement([
   false
     ? createElement([
-        createElement("input", { key: 10 }),
+        createElement("input", {
+          // key: 10
+        }),
         createElement("button", {
           children: ["cancel"],
-          key: 11,
+          // key: 11,
         }),
       ])
     : createElement([
         createElement("span", {
           children: [`items list ${2}`],
-          key: 12,
+          // key: 12,
         }),
 
         createElement("button", {
           children: ["Edit"],
-          key: 13,
+          // key: 13,
         }),
-        createElement("button", {
+        createElement("h1", {
           children: ["remove"],
-          key: 14,
+          // key: 14,
         }),
       ]),
 ]);
