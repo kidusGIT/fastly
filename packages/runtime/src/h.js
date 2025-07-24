@@ -26,8 +26,28 @@ function h(tag, attributes = {}, events = {}, children = [], key, index = 0) {
 }
 
 function mapTextNodes(children = []) {
+  const vdoms = [];
+  let counter = 0;
+  for (let index = 0; index < children.length; index++) {
+    const child = children[index];
+    if (!child) {
+      counter++;
+      continue;
+    } else if (typeof child === "string") {
+      vdoms.push(hString(child, index - counter));
+      continue;
+    }
+
+    child["index"] = index - counter;
+    vdoms.push(child);
+  }
+
+  return vdoms;
+
   return children.map((child, index) => {
-    if (child === null) {
+    // console.log("child ", child);
+    if (!child) {
+      console.log("is null ");
       return;
     } else if (typeof child === "string") {
       return hString(child, index);
@@ -56,6 +76,7 @@ export function extractChildren(vdom) {
 
   const children = [];
   for (const child of vdom.children) {
+    // console.log("child ", child);
     if (child.type === DOM_TYPES.FRAGMENT) {
       children.push(...extractChildren(child));
     } else {

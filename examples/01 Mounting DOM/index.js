@@ -65,7 +65,7 @@ class ItemList extends Component {
               // key: 15,
               children: [
                 createElement("input", {
-                  key: 20,
+                  // key: 20,
                   attrs: {
                     placeholder: "Types some thing... ",
                   },
@@ -73,15 +73,18 @@ class ItemList extends Component {
                     change: (e) => console.log("value: ", e.target.value),
                   },
                 }),
+
+                count == 20 && createElement(CHILDREN, {}),
+
                 createElement("button", {
-                  key: 21,
+                  // key: 21,
                   events: {
                     click: () => setEditable(),
                   },
                   children: ["cancel"],
                 }),
 
-                // createElement(CHILDREN, { key: 22 }),
+                count != 20 && createElement(CHILDREN, {}),
               ],
             })
           : createElement("div", {

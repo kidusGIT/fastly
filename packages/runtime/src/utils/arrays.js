@@ -24,12 +24,22 @@ export class ArrayOpDiffing {
   #oldItems;
   #newItems;
 
-  constructor(oldArray, newArray, equalsFn) {
-    this.#array = [...oldArray];
-    this.#newArray = [...newArray];
+  constructor(oldArray = [], newArray, equalsFn) {
+    // const arr = [...oldArray];
+    // console.log("oldArray (live): ", oldArray);
+    // console.log("oldArray (clone): ", JSON.parse(JSON.stringify(oldArray)));
+    // console.log("arr (live): ", arr);
+    // console.log("arr (clone): ", JSON.parse(JSON.stringify(arr)));
+    // console.log("-----------------------");
 
-    console.log("array ", this.#array);
-    console.log("oldArray ", oldArray);
+    // console.log("arr: ", arr);
+    // console.log("-----------------------");
+    this.#array = [...oldArray];
+    this.#newArray = newArray;
+
+    // console.log("array ", this.#array);
+    // console.log("oldArray ", oldArray);
+    // console.log("newArray ", this.#newArray);
     this.#equalsFn = equalsFn;
 
     this.#oldItems = this.#setNodeKey(oldArray);
@@ -142,8 +152,6 @@ export class ArrayOpDiffing {
     };
 
     if (!isLast) {
-      console.log("this.#array before: ", this.#array);
-
       const lastItem = this.#array.pop();
       if (this.length > 0) {
         this.#array[key] = lastItem;
@@ -176,7 +184,7 @@ export class ArrayOpDiffing {
 
     const replacedItem = this.#array[index];
     this.#array[index] = item;
-    this.#array.push(replacedItem);
+    replacedItem && this.#array.push(replacedItem);
     this.#setCurrentIndex(replacedItem, this.length - 1);
 
     return operation;
@@ -234,15 +242,21 @@ export class ArrayOpDiffing {
   diffChildrenArray() {
     const operations = [];
 
-    console.log("this.#array after: ", this.#array);
     for (let index = 0; index < this.#newArray.length; index++) {
       if (this.isRemoval(this.#array[index], index)) {
         const op = this.removeItem(this.#array[index], index);
         operations.push(op);
         index--;
-        // console.log("this.#array before: ", this.#array);
         continue;
       }
+
+      if (this.isNoop(this.#array[index], this.#newArray[index])) {
+        operations.push(
+          this.noopItem(this.#array[index], this.#newArray[index])
+        );
+        continue;
+      }
+
       let movedItem;
 
       if ((movedItem = this.isAddition(this.#newArray[index])) == null) {
@@ -267,8 +281,7 @@ export function arraysDiffSequence(
   const sequence = [];
   const array = new ArrayOpDiffing(oldArray, newArray, equalsFn);
 
-  array.diffChildrenArray();
-  return;
+  return array.diffChildrenArray();
 
   for (let index = 0; index < newArray.length; index++) {
     const item = newArray[index];
