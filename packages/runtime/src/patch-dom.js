@@ -75,7 +75,8 @@ export function patchDOM(oldVdom, newVdom, parentEl, component = null) {
       break;
     }
     case DOM_TYPES.CHILDREN: {
-      console.log("children");
+      console.log("new children: ", newVdom);
+      console.log("old children: ", oldVdom);
       break;
     }
   }
@@ -123,6 +124,7 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
 
     switch (operation.op) {
       case ARRAY_DIFF_OP.ADD: {
+        console.log("offset: -- ", index + offset);
         mountDOM(item, parentEl, index + offset, hostComponent);
         break;
       }
@@ -137,6 +139,8 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
         const newChild = newChildren[index];
         const el = oldChild.el;
         const elAtTargetIndex = parentEl.childNodes[index];
+
+        console.log("diffSeq: ", diffSeq);
 
         parentEl.insertBefore(el, elAtTargetIndex);
         patchDOM(oldChild, newChild, parentEl, hostComponent);

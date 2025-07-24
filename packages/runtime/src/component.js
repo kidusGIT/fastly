@@ -102,7 +102,7 @@ export class Component {
     const el = this.#hostEl;
 
     // console.log("new: ", this.render());
-    console.log("old: ", this.#vdom);
+    // console.log("old: ", this.#vdom);
 
     this.#vdom = patchDOM(this.#vdom, this.render(), el, this);
   }

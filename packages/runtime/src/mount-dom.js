@@ -62,7 +62,7 @@ function createTextNode(vdom, parentEl, index) {
   const { value } = vdom;
   const textNode = document.createTextNode(value);
   vdom.el = textNode;
-  insert(textNode, parentEl);
+  insert(textNode, parentEl, index);
 }
 
 function createElementNode(vdom, parentEl, index = null, component = null) {
@@ -70,16 +70,14 @@ function createElementNode(vdom, parentEl, index = null, component = null) {
   const element = document.createElement(tag);
 
   const { attrs, events } = vdom;
-  // assign events
-  addEventListeners(element, events);
 
-  // setting attributes
+  addEventListeners(element, events);
   assignAttributes(element, attrs);
 
   vdom.el = element;
   parent.push(children);
 
-  children.forEach((child) => mountDOM(child, element, index, component));
+  children.forEach((child) => mountDOM(child, element, null, component));
   insert(element, parentEl, index);
   getParent(true);
 }
@@ -89,12 +87,16 @@ function createFragmentNode(vdom, parentEl, index, component = null) {
   vdom.el = parentEl;
 
   parent.push(children);
-  children.forEach((child) => mountDOM(child, parentEl, index, component));
+  children.forEach((child, i) =>
+    mountDOM(child, parentEl, index ? index + i : null, component)
+  );
   getParent(true);
 }
 
 function injectChildren(vdom, component, parentEl, index = null) {
   const children = component.children;
+  console.log("children inject: ", children);
+  console.log("index inject: ", index);
   mountDOM(hFragment(children), parentEl, index, component);
   vdom.el = children[0].el;
 }
