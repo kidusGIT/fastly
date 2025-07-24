@@ -98,7 +98,7 @@ function injectChildren(vdom, component, parentEl, index = null) {
   console.log("children inject: ", children);
   console.log("index inject: ", index);
   mountDOM(hFragment(children), parentEl, index, component);
-  vdom.el = children[0].el;
+  vdom.children = children;
 }
 
 function createComponentNode(vdom, parentEl, index) {

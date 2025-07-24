@@ -1,5 +1,10 @@
 import { destroyDOM } from "./destroy-dom.js";
-import { DOM_TYPES, extractChildren } from "./h.js";
+import {
+  DOM_TYPES,
+  extractChildren,
+  getSlotIndex,
+  resetSlotIndex,
+} from "./h.js";
 import { mountDOM } from "./mount-dom.js";
 import { patchDOM } from "./patch-dom.js";
 
@@ -71,12 +76,24 @@ export class Component {
     this.#patch();
   }
 
+  #_render() {
+    const vdom = this.render();
+    const index = getSlotIndex();
+
+    if (index > -1) {
+      console.log("vdom idx ", vdom);
+      resetSlotIndex();
+    }
+
+    return vdom;
+  }
+
   mount(hostEl, index = null) {
     if (this.#isMounted) {
       throw new Error("Component is already mounted");
     }
 
-    this.#vdom = this.render();
+    this.#vdom = this.#_render();
     mountDOM(this.#vdom, hostEl, index, this);
 
     this.#hostEl = hostEl;
@@ -100,10 +117,10 @@ export class Component {
       throw new Error("Component is not mounted.");
     }
     const el = this.#hostEl;
+    const vdom = this.#_render();
 
-    // console.log("new: ", this.render());
-    // console.log("old: ", this.#vdom);
-
-    this.#vdom = patchDOM(this.#vdom, this.render(), el, this);
+    this.#vdom = patchDOM(this.#vdom, vdom, el, this);
   }
+
+  render() {}
 }

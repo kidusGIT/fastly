@@ -8,10 +8,23 @@ export const DOM_TYPES = {
 
 export const CHILDREN = DOM_TYPES.CHILDREN;
 
+let slotIndex = -1;
+let totalDepth = [];
+
+export function resetSlotIndex() {
+  slotIndex = -1;
+}
+
+export function getSlotIndex() {
+  return slotIndex;
+}
+
 function h(tag, attributes = {}, events = {}, children = [], key, index = 0) {
   const type =
     typeof tag === "string" ? DOM_TYPES.ELEMENT : DOM_TYPES.COMPONENT;
   const { props, attrs } = attributes;
+
+  const depth = [];
 
   return {
     tag,
@@ -21,41 +34,35 @@ function h(tag, attributes = {}, events = {}, children = [], key, index = 0) {
     type: tag === DOM_TYPES.CHILDREN ? DOM_TYPES.CHILDREN : type,
     key,
     index,
-    children: mapTextNodes(children),
+    children: mapTextNodes(children, depth),
   };
 }
 
 function mapTextNodes(children = []) {
-  const vdoms = [];
+  const vNodes = [];
   let counter = 0;
   for (let index = 0; index < children.length; index++) {
     const child = children[index];
+    const childIndex = index - counter;
+
     if (!child) {
       counter++;
       continue;
     } else if (typeof child === "string") {
-      vdoms.push(hString(child, index - counter));
+      vNodes.push(hString(child, childIndex));
       continue;
     }
 
-    child["index"] = index - counter;
-    vdoms.push(child);
-  }
-
-  return vdoms;
-
-  return children.map((child, index) => {
-    // console.log("child ", child);
-    if (!child) {
-      console.log("is null ");
-      return;
-    } else if (typeof child === "string") {
-      return hString(child, index);
+    if (child?.tag === DOM_TYPES.CHILDREN) {
+      slotIndex = childIndex;
+      totalDepth = [...depth];
     }
 
-    child["index"] = index;
-    return child;
-  });
+    child["index"] = childIndex;
+    vNodes.push(child);
+  }
+
+  return vNodes;
 }
 
 function hString(value, index) {

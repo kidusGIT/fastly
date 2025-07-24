@@ -1,5 +1,5 @@
 import { destroyDOM } from "./destroy-dom.js";
-import { createElement, DOM_TYPES, extractChildren } from "./h.js";
+import { createElement, DOM_TYPES, extractChildren, hFragment } from "./h.js";
 import { mountDOM } from "./mount-dom.js";
 import {
   addStyle,
@@ -75,8 +75,8 @@ export function patchDOM(oldVdom, newVdom, parentEl, component = null) {
       break;
     }
     case DOM_TYPES.CHILDREN: {
-      console.log("new children: ", newVdom);
-      console.log("old children: ", oldVdom);
+      // console.log("new children: ", newVdom);
+      // console.log("old children: ", oldVdom);
       break;
     }
   }
@@ -124,7 +124,6 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
 
     switch (operation.op) {
       case ARRAY_DIFF_OP.ADD: {
-        console.log("offset: -- ", index + offset);
         mountDOM(item, parentEl, index + offset, hostComponent);
         break;
       }
@@ -140,7 +139,18 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
         const el = oldChild.el;
         const elAtTargetIndex = parentEl.childNodes[index];
 
-        console.log("diffSeq: ", diffSeq);
+        if (newChild.type === DOM_TYPES.CHILDREN) {
+          console.log("--------------------------");
+          console.log("oldChild.children: ", oldChild.children);
+          console.log("diffSeq: ", operation);
+          console.log("new item: ", newChild);
+          console.log("old item: ", oldChild);
+          destroyDOM(hFragment(oldChild.children), hostComponent);
+          mountDOM(newChild, parentEl, index + offset, hostComponent);
+
+          console.log("it is children");
+          break;
+        }
 
         parentEl.insertBefore(el, elAtTargetIndex);
         patchDOM(oldChild, newChild, parentEl, hostComponent);
