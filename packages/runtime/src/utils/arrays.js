@@ -135,13 +135,15 @@ export class ArrayOpDiffing {
   removeItem(removeItem, key, isLast = false) {
     const operation = {
       op: ARRAY_DIFF_OP.REMOVE,
-      index: key,
+      index: removeItem?.index,
       item: removeItem,
     };
 
     if (!isLast) {
-      const lastItem = this.#array.pop();
-      if (this.length > 0) {
+      if (key === this.length - 1) {
+        this.#array.pop();
+      } else if (key < this.length) {
+        const lastItem = this.#array.pop();
         this.#array[key] = lastItem;
         this.#setCurrentIndex(lastItem, key);
       }
@@ -207,8 +209,8 @@ export class ArrayOpDiffing {
     const operation = {
       op: ARRAY_DIFF_OP.MOVE,
       originalIndex,
-      from: originalIndex,
-      index: to?.index,
+      from: item?.index,
+      index: toItem?.index,
       item: toItem,
     };
 
@@ -217,8 +219,6 @@ export class ArrayOpDiffing {
 
   removeItemsAfter(index) {
     const operations = [];
-    // console.log("index ", index);
-    // console.log("this.length ", this.#array);
     while (this.length > index) {
       operations.push(this.removeItem(this.#array[index], index, true));
       index++;
@@ -231,37 +231,29 @@ export class ArrayOpDiffing {
     const operations = [];
     let f = 0;
     for (let index = 0; index < this.#newArray.length; index++) {
-      if (this.#array[index] && this.isRemoval(this.#array[index], index)) {
-        console.log("removed " + this.#array[index].tag);
-        const op = this.removeItem(this.#array[index], index);
-        f++;
+      const item = this.#array[index];
+      const newItem = this.#newArray[index];
+
+      if (item && this.isRemoval(item, index)) {
+        const op = this.removeItem(item, index);
         operations.push(op);
         index--;
-        if (f > 60) {
-          break;
-        }
         continue;
       }
 
-      if (this.isNoop(this.#array[index], this.#newArray[index])) {
-        console.log("Nooped " + this.#array[index].tag);
-        operations.push(
-          this.noopItem(this.#array[index], this.#newArray[index])
-        );
+      if (this.isNoop(item, newItem)) {
+        operations.push(this.noopItem(item, newItem));
         continue;
       }
 
       let movedItem;
 
-      if ((movedItem = this.isAddition(this.#newArray[index])) == null) {
-        console.log("Added " + this.#array[index].tag);
-        const op = this.addItem(this.#newArray[index], this.#array[index]);
+      if ((movedItem = this.isAddition(newItem)) == null) {
+        const op = this.addItem(newItem, item);
         operations.push(op);
         continue;
       }
-
-      console.log("Moved " + this.#array[index].tag);
-      operations.push(this.moveItem(movedItem, this.#newArray[index]));
+      operations.push(this.moveItem(movedItem, newItem));
     }
 
     operations.push(...this.removeItemsAfter(this.#newArray.length));

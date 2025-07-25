@@ -111,15 +111,12 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
   // console.log("------------------------");
 
   const oldChildren = extractChildren(oldVdom);
-  // console.log("oldChildren ", JSON.parse(JSON.stringify(oldChildren)));
   const arr = oldChildren.map((child) => child);
   const newChildren = extractChildren(newVdom);
   const parentEl = oldVdom.el;
 
-  // console.log("newChildren ", newChildren);
-  // console.log("arr ", JSON.parse(JSON.stringify(arr)));
-  console.log("oldVdom ", JSON.parse(JSON.stringify(oldChildren)));
-  console.log("newVdom ", JSON.parse(JSON.stringify(newChildren)));
+  // console.log("oldVdom ", JSON.parse(JSON.stringify(oldChildren)));
+  // console.log("newVdom ", JSON.parse(JSON.stringify(newChildren)));
 
   const diffSeq = new ArrayOpDiffing(
     oldChildren,
@@ -127,8 +124,8 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
     areNodesEqual
   ).diffChildrenArray();
 
-  // console.log("diffSeq ", diffSeq);
-
+  console.log("diffSeq ", diffSeq);
+  return;
   for (const operation of diffSeq) {
     const { originalIndex, index, item } = operation;
     const offset = hostComponent?.offset ?? 0;
@@ -182,42 +179,22 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
   }
 }
 
-// const f1 = createElement([
-//   createElement([
-//     createElement("input", {
-//       // key: 10,
-//       // children: ["Edit"],
-//     }),
-//     createElement("button", {
-//       children: ["cancel"],
-//       // key: 11,
-//     }),
-//   ]),
-// ]);
+const oldNode = createElement([
+  createElement("input"),
+  createElement("p"),
+  createElement("component"),
+  createElement("button"),
+  createElement([createElement("b"), createElement("i"), createElement("j")]),
+]);
+const newNode = createElement([
+  createElement("span"),
+  createElement("button"),
+  createElement([createElement("b"), createElement("i"), createElement("j")]),
+  createElement("div"),
+  createElement("button"),
+]);
 
-// const f2 = createElement([
-//   createElement([
-//     createElement("span", {
-//       children: [`items list ${2}`],
-//       // key: 12,
-//     }),
-
-//     createElement("button", {
-//       children: ["Edit"],
-//       // key: 13,
-//     }),
-//     createElement("button", {
-//       children: ["remove"],
-//       // key: 14,
-//     }),
-//     createElement("input", {
-//       // children: ["remove"],
-//       // key: 10,
-//     }),
-//   ]),
-// ]);
-
-// patchChildren(f2, f1);
+patchChildren(newNode, oldNode);
 
 function patchElement(oldVdom, newVdom) {
   const el = oldVdom.el;

@@ -32,7 +32,6 @@ function h(tag, attributes = {}, events = {}, children = [], key, index = 0) {
     attrs: attrs ?? {},
     props,
     events,
-    hasIndexChanged: false,
     type: tag === DOM_TYPES.CHILDREN ? DOM_TYPES.CHILDREN : type,
     key,
     index,
