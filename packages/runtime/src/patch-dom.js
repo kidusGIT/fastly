@@ -108,9 +108,18 @@ function patchComponent(oldVdom, newVdom) {
 }
 
 function patchChildren(oldVdom, newVdom, hostComponent) {
+  // console.log("------------------------");
+
   const oldChildren = extractChildren(oldVdom);
+  // console.log("oldChildren ", JSON.parse(JSON.stringify(oldChildren)));
+  const arr = oldChildren.map((child) => child);
   const newChildren = extractChildren(newVdom);
   const parentEl = oldVdom.el;
+
+  // console.log("newChildren ", newChildren);
+  // console.log("arr ", JSON.parse(JSON.stringify(arr)));
+  console.log("oldVdom ", JSON.parse(JSON.stringify(oldChildren)));
+  console.log("newVdom ", JSON.parse(JSON.stringify(newChildren)));
 
   const diffSeq = new ArrayOpDiffing(
     oldChildren,
@@ -118,9 +127,13 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
     areNodesEqual
   ).diffChildrenArray();
 
+  // console.log("diffSeq ", diffSeq);
+
   for (const operation of diffSeq) {
     const { originalIndex, index, item } = operation;
     const offset = hostComponent?.offset ?? 0;
+    // console.log("op", operation.op);
+    // console.log("operation", operation);
 
     switch (operation.op) {
       case ARRAY_DIFF_OP.ADD: {
@@ -139,18 +152,14 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
         const el = oldChild.el;
         const elAtTargetIndex = parentEl.childNodes[index];
 
-        if (newChild.type === DOM_TYPES.CHILDREN) {
-          console.log("--------------------------");
-          console.log("oldChild.children: ", oldChild.children);
-          console.log("diffSeq: ", operation);
-          console.log("new item: ", newChild);
-          console.log("old item: ", oldChild);
-          destroyDOM(hFragment(oldChild.children), hostComponent);
-          mountDOM(newChild, parentEl, index + offset, hostComponent);
-
-          console.log("it is children");
+        if (index === originalIndex) {
+          patchDOM(oldChild, newChild, parentEl, hostComponent);
           break;
         }
+
+        // console.log("Moved -- ");
+        // console.log("oldChild ", oldChild);
+        // console.log("newChild ", newChild);
 
         parentEl.insertBefore(el, elAtTargetIndex);
         patchDOM(oldChild, newChild, parentEl, hostComponent);
@@ -159,6 +168,7 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
 
       case ARRAY_DIFF_OP.NOOP: {
         // then patch the children of the moved element
+        // console.log("noop here -- ");
 
         patchDOM(
           oldChildren[originalIndex],

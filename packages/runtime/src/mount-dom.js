@@ -45,13 +45,6 @@ export function mountDOM(vdom, parentEl, index, component = null) {
     case DOM_TYPES.COMPONENT:
       createComponentNode(vdom, parentEl, index);
       break;
-    case DOM_TYPES.CHILDREN:
-      if (component == null) {
-        throw new Error("Component is required to mount children.");
-      }
-
-      injectChildren(vdom, component, parentEl, index);
-      break;
     default: {
       throw new Error(`Can't mount DOM of type: ${vdom.type}`);
     }

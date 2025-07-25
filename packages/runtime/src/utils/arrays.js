@@ -25,21 +25,9 @@ export class ArrayOpDiffing {
   #newItems;
 
   constructor(oldArray = [], newArray, equalsFn) {
-    // const arr = [...oldArray];
-    // console.log("oldArray (live): ", oldArray);
-    // console.log("oldArray (clone): ", JSON.parse(JSON.stringify(oldArray)));
-    // console.log("arr (live): ", arr);
-    // console.log("arr (clone): ", JSON.parse(JSON.stringify(arr)));
-    // console.log("-----------------------");
-
-    // console.log("arr: ", arr);
-    // console.log("-----------------------");
     this.#array = [...oldArray];
     this.#newArray = newArray;
 
-    // console.log("array ", this.#array);
-    // console.log("oldArray ", oldArray);
-    // console.log("newArray ", this.#newArray);
     this.#equalsFn = equalsFn;
 
     this.#oldItems = this.#setNodeKey(oldArray);
@@ -241,16 +229,22 @@ export class ArrayOpDiffing {
 
   diffChildrenArray() {
     const operations = [];
-
+    let f = 0;
     for (let index = 0; index < this.#newArray.length; index++) {
-      if (this.isRemoval(this.#array[index], index)) {
+      if (this.#array[index] && this.isRemoval(this.#array[index], index)) {
+        console.log("removed " + this.#array[index].tag);
         const op = this.removeItem(this.#array[index], index);
+        f++;
         operations.push(op);
         index--;
+        if (f > 60) {
+          break;
+        }
         continue;
       }
 
       if (this.isNoop(this.#array[index], this.#newArray[index])) {
+        console.log("Nooped " + this.#array[index].tag);
         operations.push(
           this.noopItem(this.#array[index], this.#newArray[index])
         );
@@ -260,11 +254,13 @@ export class ArrayOpDiffing {
       let movedItem;
 
       if ((movedItem = this.isAddition(this.#newArray[index])) == null) {
+        console.log("Added " + this.#array[index].tag);
         const op = this.addItem(this.#newArray[index], this.#array[index]);
         operations.push(op);
         continue;
       }
 
+      console.log("Moved " + this.#array[index].tag);
       operations.push(this.moveItem(movedItem, this.#newArray[index]));
     }
 

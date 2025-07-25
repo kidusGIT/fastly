@@ -3,6 +3,7 @@ import {
   DOM_TYPES,
   extractChildren,
   getSlotIndex,
+  hFragment,
   resetSlotIndex,
 } from "./h.js";
 import { mountDOM } from "./mount-dom.js";
@@ -78,10 +79,13 @@ export class Component {
 
   #_render() {
     const vdom = this.render();
-    const index = getSlotIndex();
+    const { index, parents } = getSlotIndex();
 
     if (index > -1) {
-      console.log("vdom idx ", vdom);
+      const view = this.#children.map((obj) => Object.assign({}, obj));
+      parents[index] = hFragment(view);
+      console.log("old vdom --- ", JSON.parse(JSON.stringify(this.#vdom)));
+      console.log("vdom --- ", JSON.parse(JSON.stringify(vdom)));
       resetSlotIndex();
     }
 

@@ -9,14 +9,15 @@ export const DOM_TYPES = {
 export const CHILDREN = DOM_TYPES.CHILDREN;
 
 let slotIndex = -1;
-let totalDepth = [];
+let childrenArray = [];
 
 export function resetSlotIndex() {
   slotIndex = -1;
+  childrenArray = [];
 }
 
 export function getSlotIndex() {
-  return slotIndex;
+  return { index: slotIndex, parents: childrenArray };
 }
 
 function h(tag, attributes = {}, events = {}, children = [], key, index = 0) {
@@ -31,6 +32,7 @@ function h(tag, attributes = {}, events = {}, children = [], key, index = 0) {
     attrs: attrs ?? {},
     props,
     events,
+    hasIndexChanged: false,
     type: tag === DOM_TYPES.CHILDREN ? DOM_TYPES.CHILDREN : type,
     key,
     index,
@@ -45,7 +47,7 @@ function mapTextNodes(children = []) {
     const child = children[index];
     const childIndex = index - counter;
 
-    if (!child) {
+    if (!child || typeof child === "boolean") {
       counter++;
       continue;
     } else if (typeof child === "string") {
@@ -55,7 +57,7 @@ function mapTextNodes(children = []) {
 
     if (child?.tag === DOM_TYPES.CHILDREN) {
       slotIndex = childIndex;
-      totalDepth = [...depth];
+      childrenArray = vNodes;
     }
 
     child["index"] = childIndex;
@@ -76,17 +78,19 @@ export function hFragment(vNodes) {
   };
 }
 
-export function extractChildren(vdom) {
+export function extractChildren(vdom, offset = 0) {
   if (vdom.children == null) {
     return [];
   }
 
   const children = [];
-  for (const child of vdom.children) {
-    // console.log("child ", child);
+  for (const i in vdom.children) {
+    const child = vdom.children[i];
+
     if (child.type === DOM_TYPES.FRAGMENT) {
-      children.push(...extractChildren(child));
+      children.push(...extractChildren(child, parseInt(i) + offset));
     } else {
+      child.index = children.length + offset;
       children.push(child);
     }
   }
@@ -107,3 +111,42 @@ export function createElement(
 
   return h(tag, attributes, events, children, key);
 }
+
+const ch1 = createElement("div", {
+  children: [
+    createElement([
+      createElement("i"),
+      createElement("s"),
+      createElement([
+        createElement("b"),
+        createElement("u"),
+        createElement([createElement("f"), createElement("d")]),
+      ]),
+      createElement("g"),
+      createElement("h"),
+    ]),
+  ],
+});
+
+const child = createElement([
+  createElement("i"),
+  createElement("s"),
+  createElement([
+    createElement("b"),
+    createElement("u"),
+    createElement([createElement("f"), createElement("d")]),
+  ]),
+  createElement("g"),
+  createElement("h"),
+]);
+
+// const children = extractChildren(ch1);
+
+// children.forEach((element) => {
+//   console.log("index: " + element?.index + ", tag: " + element?.tag);
+// });
+// console.log("----------------------");
+// const chil = extractChildren(ch1);
+// chil.forEach((element) => {
+//   console.log("index: " + element?.index + ", tag: " + element?.tag);
+// });
