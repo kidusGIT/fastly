@@ -9,12 +9,7 @@ import {
 } from "./utils/attributes.js";
 import { objectDiff } from "./utils/objects.js";
 import { assignEventListener } from "./utils/events.js";
-import {
-  ARRAY_DIFF_OP,
-  ArrayOpDiffing,
-  arraysDiff,
-  arraysDiffSequence,
-} from "./utils/arrays.js";
+import { ARRAY_DIFF_OP, ArrayOpDiffing, arraysDiff } from "./utils/arrays.js";
 
 function isNotEmptyString(str) {
   return str !== "";
