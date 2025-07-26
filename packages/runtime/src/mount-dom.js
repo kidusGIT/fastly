@@ -1,4 +1,4 @@
-import { DOM_TYPES, hFragment } from "./h.js";
+import { DOM_TYPES } from "./h.js";
 import { assignAttributes } from "./utils/attributes.js";
 import { addEventListeners } from "./utils/events.js";
 
@@ -84,14 +84,6 @@ function createFragmentNode(vdom, parentEl, index, component = null) {
     mountDOM(child, parentEl, index ? index + i : null, component)
   );
   getParent(true);
-}
-
-function injectChildren(vdom, component, parentEl, index = null) {
-  const children = component.children;
-  console.log("children inject: ", children);
-  console.log("index inject: ", index);
-  mountDOM(hFragment(children), parentEl, index, component);
-  vdom.children = children;
 }
 
 function createComponentNode(vdom, parentEl, index) {

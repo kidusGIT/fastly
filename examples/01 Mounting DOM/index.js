@@ -48,8 +48,8 @@ class ItemList extends Component {
   isEdit;
 
   render() {
-    const { index, updateState, count, number } = this.props;
-
+    const { updateState, count, number } = this.props;
+    // console.log("index ", index);
     const setEditable = () => {
       this.isEdit = !this.isEdit;
       this.setState();
@@ -91,7 +91,7 @@ class ItemList extends Component {
               // key: 20,
               children: [
                 createElement("span", {
-                  children: [`items list ${number + count}`],
+                  children: [`items list ${number}`],
                 }),
                 createElement("button", {
                   events: {
@@ -101,7 +101,11 @@ class ItemList extends Component {
                 }),
                 createElement("button", {
                   events: {
-                    click: () => updateState(index),
+                    click: () => {
+                      // console.log("index called: ", this.props.index);
+                      const { index } = this.props;
+                      updateState(index);
+                    },
                   },
                   children: ["remove"],
                 }),
@@ -124,7 +128,13 @@ class HeaderComponent extends Component {
 
   updateState(index) {
     this.setState(() => {
+      console.log("index ", index);
+      console.log(
+        "item before  ",
+        JSON.parse(JSON.stringify(this.itemNumbers))
+      );
       this.itemNumbers.splice(index, 1);
+      console.log("item ", JSON.parse(JSON.stringify(this.itemNumbers)));
     });
   }
 
@@ -187,14 +197,36 @@ class HeaderComponent extends Component {
         attrs: {
           class: "flex",
         },
-        children: [
+        // children: [
+        //   createElement(ItemList, {
+        //     key: 12,
+        //     props: {
+        //       number: 12,
+        //       updateState: this.updateState,
+        //       count: this.count,
+        //       index: 5,
+        //     },
+        //     children: [
+        //       createElement("p", {
+        //         children: [`Item ${this.value} - ${this.count}`],
+        //       }),
+        //       createElement(SubItem, {
+        //         props: {
+        //           index: 15,
+        //           updateState: this.propFunc,
+        //         },
+        //       }),
+        //     ],
+        //   }),
+        // ],
+        children: this.itemNumbers.map((num, i) =>
           createElement(ItemList, {
-            key: 12,
+            key: num.k,
             props: {
-              number: 12,
+              number: num.v,
               updateState: this.updateState,
               count: this.count,
-              index: 5,
+              index: i,
             },
             children: [
               createElement("p", {
@@ -207,24 +239,8 @@ class HeaderComponent extends Component {
                 },
               }),
             ],
-          }),
-        ],
-        // children: this.itemNumbers.map((num, i) =>
-        //   createElement(ItemList, {
-        //     key: num.k,
-        //     props: {
-        //       number: num.v,
-        //       updateState: this.updateState,
-        //       count: this.count,
-        //       index: i,
-        //     },
-        //     children: [
-        //       createElement("h1", {
-        //         children: [`Item ${num.k}`],
-        //       }),
-        //     ],
-        //   })
-        // ),
+          })
+        ),
       }),
     ]);
 

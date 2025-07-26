@@ -68,6 +68,7 @@ export class Component {
   updateProps(props = {}, isNotMount = true) {
     this.#props = props;
     if (isNotMount && this.#isMounted) {
+      // console.log("patch props comp ", props);
       this.#patch();
     }
   }
@@ -84,8 +85,6 @@ export class Component {
     if (index > -1) {
       const view = this.#children.map((obj) => Object.assign({}, obj));
       parents[index] = hFragment(view);
-      console.log("old vdom --- ", JSON.parse(JSON.stringify(this.#vdom)));
-      console.log("vdom --- ", JSON.parse(JSON.stringify(vdom)));
       resetSlotIndex();
     }
 
@@ -122,6 +121,9 @@ export class Component {
     }
     const el = this.#hostEl;
     const vdom = this.#_render();
+
+    // console.log("old vdom --- ", JSON.parse(JSON.stringify(this.#vdom)));
+    // console.log("vdom --- ", JSON.parse(JSON.stringify(vdom)));
 
     this.#vdom = patchDOM(this.#vdom, vdom, el, this);
   }

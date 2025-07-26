@@ -34,15 +34,6 @@ export class ArrayOpDiffing {
     this.#newItems = this.#setNodeKey(newArray);
   }
 
-  #setNodes(items) {
-    const map = new Map();
-    items.forEach((item, index) => {
-      map.set(index, item);
-    });
-
-    return map;
-  }
-
   #setNodeKey(items = []) {
     const map = new Map();
     items.forEach((item) => {
@@ -66,29 +57,7 @@ export class ArrayOpDiffing {
     return this.#array.length;
   }
 
-  #getKey(item) {
-    return item?.key;
-  }
-
-  #getOldItem(item) {
-    const key = this.#getKey(item);
-    if (!(key in this.#oldItems)) {
-      return null;
-    }
-
-    return this.#oldItems[key];
-  }
-
-  #getNewItem(item) {
-    const key = this.#getKey(item);
-    if (!(key in this.#newItems)) {
-      return null;
-    }
-
-    return this.#newItems[key];
-  }
-
-  isRemoval(oldItem, index, operations = []) {
+  isRemoval(oldItem) {
     if (!oldItem) {
       return false;
     }
@@ -234,7 +203,7 @@ export class ArrayOpDiffing {
       const item = this.#array[index];
       const newItem = this.#newArray[index];
 
-      if (item && this.isRemoval(item, index)) {
+      if (item && this.isRemoval(item)) {
         const op = this.removeItem(item, index);
         operations.push(op);
         index--;
@@ -259,41 +228,4 @@ export class ArrayOpDiffing {
     operations.push(...this.removeItemsAfter(this.#newArray.length));
     return operations;
   }
-}
-
-export function arraysDiffSequence(
-  oldArray,
-  newArray,
-  equalsFn = (a, b) => a === b
-) {
-  const sequence = [];
-  const array = new ArrayOpDiffing(oldArray, newArray, equalsFn);
-
-  return array.diffChildrenArray();
-
-  for (let index = 0; index < newArray.length; index++) {
-    const item = newArray[index];
-
-    if (array.isNoop(index, item)) {
-      sequence.push(array.noopItem(index));
-      continue;
-    }
-
-    if (array.isAddition(item)) {
-      sequence.push(array.addItem(item, index));
-      continue;
-    }
-
-    if (array.isRemoval(index)) {
-      sequence.push(array.removeItem(index));
-      index--;
-      continue;
-    }
-
-    sequence.push(array.moveItem(item, index));
-  }
-
-  sequence.push(...array.removeItemsAfter(newArray.length));
-
-  return sequence;
 }
