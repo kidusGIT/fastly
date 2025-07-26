@@ -188,7 +188,7 @@ export class ArrayOpDiffing {
     }
 
     const nodes = map.get(item?.tag) ?? [];
-    if (Array.isArray(nodes)) {
+    if (Array.isArray(nodes) && nodes.length > 0) {
       const moved = nodes.pop();
       return moved;
     }
@@ -210,8 +210,8 @@ export class ArrayOpDiffing {
       op: ARRAY_DIFF_OP.MOVE,
       originalIndex,
       from: item?.index,
-      index: toItem?.index,
-      item: toItem,
+      index: to?.index,
+      item: to,
     };
 
     return operation;

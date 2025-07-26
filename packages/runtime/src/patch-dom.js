@@ -115,8 +115,8 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
   const newChildren = extractChildren(newVdom);
   const parentEl = oldVdom.el;
 
-  // console.log("oldVdom ", JSON.parse(JSON.stringify(oldChildren)));
-  // console.log("newVdom ", JSON.parse(JSON.stringify(newChildren)));
+  console.log("oldVdom ", JSON.parse(JSON.stringify(oldChildren)));
+  console.log("newVdom ", JSON.parse(JSON.stringify(newChildren)));
 
   const diffSeq = new ArrayOpDiffing(
     oldChildren,
@@ -180,21 +180,29 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
 }
 
 const oldNode = createElement([
-  createElement("input"),
-  createElement("p"),
-  createElement("component"),
-  createElement("button"),
-  createElement([createElement("b"), createElement("i"), createElement("j")]),
+  createElement("input", { key: 12 }),
+  createElement("p", { key: 15 }),
+  createElement("component", { key: 14 }),
+  createElement("button", { key: 16 }),
+  createElement([
+    createElement("i", { key: 5 }),
+    createElement("b", { key: 6 }),
+    createElement("j", { key: 7 }),
+  ]),
 ]);
 const newNode = createElement([
-  createElement("span"),
-  createElement("button"),
-  createElement([createElement("b"), createElement("i"), createElement("j")]),
-  createElement("div"),
-  createElement("button"),
+  createElement("span", { key: 12 }),
+  createElement("button", { key: 16 }),
+  createElement([
+    createElement("b", { key: 6 }),
+    createElement("j", { key: 7 }),
+  ]),
+  createElement("div", { key: 25 }),
+  createElement("button", { key: 16 }),
+  createElement("p", { key: 15 }),
 ]);
 
-patchChildren(newNode, oldNode);
+patchChildren(oldNode, newNode);
 
 function patchElement(oldVdom, newVdom) {
   const el = oldVdom.el;
