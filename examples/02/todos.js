@@ -197,7 +197,7 @@ class App extends Component {
             this.todos.length === 0
               ? createElement("span", {
                   attrs: { class: "flex-center" },
-                  children: ["All todos are done"],
+                  children: ["All todos are done..."],
                 })
               : createElement(
                   this.todos.map((todo, index) =>
