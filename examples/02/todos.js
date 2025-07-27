@@ -67,8 +67,6 @@ class TodoItem extends Component {
       this.setState();
     };
 
-    // this.text = this.props.todo;
-
     return createElement("div", {
       attrs: {
         class: "item-style",
@@ -128,7 +126,7 @@ class TodoItem extends Component {
               createElement("span", {
                 attrs: { class: "flex-1" },
                 events: {
-                  click: () => setEditable(),
+                  dblclick: () => setEditable(),
                 },
                 children: [this.props?.todo],
               }),
@@ -152,10 +150,13 @@ class TodoItem extends Component {
   }
 }
 
-// app.removeEventListener()
-
 class App extends Component {
-  todos = [{ todo: "Do this", key: crypto.randomUUID() }];
+  todos = [
+    { todo: "Do this", key: crypto.randomUUID() },
+    { todo: "Do That", key: crypto.randomUUID() },
+    { todo: "Feed the Dog", key: crypto.randomUUID() },
+    { todo: "Wash the dishes", key: crypto.randomUUID() },
+  ];
 
   addTodo(todo, index) {
     if (typeof index === "number") {
