@@ -101,7 +101,7 @@ export class ArrayOpDiffing {
     }
   }
 
-  removeItem(removeItem, key, isLast = false) {
+  removeItem(removeItem, index, isLast = false) {
     const operation = {
       op: ARRAY_DIFF_OP.REMOVE,
       index: removeItem?.index,
@@ -109,12 +109,12 @@ export class ArrayOpDiffing {
     };
 
     if (!isLast) {
-      if (key === this.length - 1) {
+      if (index === this.length - 1) {
         this.#array.pop();
-      } else if (key < this.length) {
+      } else if (index < this.length) {
         const lastItem = this.#array.pop();
-        this.#array[key] = lastItem;
-        this.#setCurrentIndex(lastItem, key);
+        this.#array[index] = lastItem;
+        this.#setCurrentIndex(lastItem, index);
       }
     }
 
