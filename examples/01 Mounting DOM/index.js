@@ -1,9 +1,8 @@
 import { CHILDREN } from "../../packages/runtime/src/h.js";
 import {
   createElement,
-  mountDOM,
-  destroyDOM,
   Component,
+  createApp,
 } from "../../packages/runtime/src/index.js";
 
 const app = document.getElementById("app");
@@ -248,5 +247,4 @@ class HeaderComponent extends Component {
   }
 }
 
-const head = new HeaderComponent();
-head.mount(app);
+createApp(HeaderComponent).mount(app);
