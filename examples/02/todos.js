@@ -1,4 +1,8 @@
-import { createElement, Component } from "../../packages/runtime/src/index.js";
+import {
+  createElement,
+  Component,
+  createApp,
+} from "../../packages/runtime/src/index.js";
 
 const app = document.getElementById("app");
 
@@ -174,6 +178,12 @@ class App extends Component {
     return createElement("div", {
       attrs: { class: "" },
       children: [
+        createElement("h2", {
+          attrs: {
+            class: "flex-center",
+          },
+          children: ["Fastly Todo"],
+        }),
         createElement(Header, {
           props: {
             todos: this.todos,
@@ -184,7 +194,10 @@ class App extends Component {
         createElement("div", {
           children: [
             this.todos.length === 0
-              ? "All todos are done"
+              ? createElement("span", {
+                  attrs: { class: "flex-center" },
+                  children: ["All todos are done"],
+                })
               : createElement(
                   this.todos.map((todo, index) =>
                     createElement(TodoItem, {
@@ -205,4 +218,5 @@ class App extends Component {
   }
 }
 
-new App().mount(app);
+// new App().mount(app);
+createApp(App).mount(app);
