@@ -182,7 +182,7 @@ function patchElement(oldVdom, newVdom) {
   const oldEvents = oldVdom.events;
 
   const { class: newClass, style: newStyle, ...newAttrs } = newVdom.attrs;
-  const newEvents = oldVdom.events;
+  const newEvents = newVdom.events;
 
   patchAttrs(el, oldAttrs, newAttrs);
   patchClass(el, oldClass, newClass);
@@ -238,4 +238,8 @@ function patchEvents(el, oldEvents = {}, newEvents = {}) {
   for (const eventName of added.concat(updated)) {
     assignEventListener(el, eventName, newEvents[eventName]);
   }
+
+  Object.entries(newEvents).forEach(([name, value]) => {
+    assignEventListener(el, name, value);
+  });
 }

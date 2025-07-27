@@ -68,14 +68,15 @@ export class Component {
   updateProps(props = {}, isNotMount = true) {
     this.#props = props;
     if (isNotMount && this.#isMounted) {
-      // console.log("patch props comp ", props);
       this.#patch();
     }
   }
 
   setState(cb = () => {}) {
     cb();
-    this.#patch();
+    if (this.#isMounted) {
+      this.#patch();
+    }
   }
 
   #_render() {
