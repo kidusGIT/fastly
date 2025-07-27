@@ -238,8 +238,4 @@ function patchEvents(el, oldEvents = {}, newEvents = {}) {
   for (const eventName of added.concat(updated)) {
     assignEventListener(el, eventName, newEvents[eventName]);
   }
-
-  Object.entries(newEvents).forEach(([name, value]) => {
-    assignEventListener(el, name, value);
-  });
 }

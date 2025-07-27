@@ -219,5 +219,4 @@ class App extends Component {
   }
 }
 
-// new App().mount(app);
 createApp(App).mount(app);
