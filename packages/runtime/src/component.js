@@ -123,9 +123,6 @@ export class Component {
     const el = this.#hostEl;
     const vdom = this.#_render();
 
-    // console.log("old vdom --- ", JSON.parse(JSON.stringify(this.#vdom)));
-    // console.log("vdom --- ", JSON.parse(JSON.stringify(vdom)));
-
     this.#vdom = patchDOM(this.#vdom, vdom, el, this);
   }
 
