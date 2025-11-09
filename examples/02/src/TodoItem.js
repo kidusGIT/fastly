@@ -4,6 +4,10 @@ export class TodoItem extends Component {
   isEdit = false;
   text = this.props.todo;
 
+  onUnmounted() {
+    console.log("unmounted: ", this.props.todo);
+  }
+
   render() {
     const setEditable = () => {
       this.isEdit = !this.isEdit;

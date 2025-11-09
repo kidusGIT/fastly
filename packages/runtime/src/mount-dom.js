@@ -1,4 +1,5 @@
 import { DOM_TYPES } from "./h.js";
+import { enqueueJob } from "./scheduler.js";
 import { assignAttributes } from "./utils/attributes.js";
 import { addEventListeners } from "./utils/events.js";
 
@@ -42,9 +43,11 @@ export function mountDOM(vdom, parentEl, index, component = null) {
     case DOM_TYPES.FRAGMENT:
       createFragmentNode(vdom, parentEl, index, component);
       break;
-    case DOM_TYPES.COMPONENT:
+    case DOM_TYPES.COMPONENT: {
       createComponentNode(vdom, parentEl, index);
+      enqueueJob(() => vdom.component.onMounted());
       break;
+    }
     default: {
       throw new Error(`Can't mount DOM of type: ${vdom.type}`);
     }

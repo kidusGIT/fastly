@@ -3,13 +3,45 @@ import { createElement, Component } from "../../../packages/runtime/src/index";
 export class Header extends Component {
   todo = "";
 
-  addTodo() {
-    this.props.addTodo(this.todo);
-    this.todo = "";
-    this.setState();
+  isLoading = false;
+
+  async onMounted() {
+    this.setState(() => (this.isLoading = true));
+    // const res = await fetch(`https://dummyjson.com/products`);
+    // const data = await res.json();
+    this.setState(() => (this.isLoading = false));
+  }
+
+  async addTodo() {
+    try {
+      this.setState(() => (this.isLoading = true));
+      const res = await fetch(`https://dummyjson.com/products`);
+      const data = await res.json();
+
+      this.props.addTodo(this.todo);
+      this.todo = "";
+
+      this.setState(() => (this.isLoading = false));
+    } catch (error) {
+      console.log("error ", error);
+      this.setState(() => (this.isLoading = false));
+    }
   }
 
   render() {
+    if (this.isLoading) {
+      console.log("hello ");
+
+      return createElement("div", {
+        children: [
+          createElement("p", {
+            children: ["Loading..."],
+            attrs: { style: { marginLeft: "12px" } },
+          }),
+        ],
+      });
+    }
+
     return createElement("div", {
       attrs: {
         class: "item-style",

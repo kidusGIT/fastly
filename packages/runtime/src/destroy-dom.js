@@ -1,4 +1,5 @@
 import { DOM_TYPES, hFragment } from "./h.js";
+import { enqueueJob } from "./scheduler.js";
 import { removeEventListener } from "./utils/events.js";
 
 export function destroyDOM(vdom, component = null) {
@@ -20,6 +21,7 @@ export function destroyDOM(vdom, component = null) {
     case DOM_TYPES.COMPONENT: {
       const component = vdom.component;
       component.unmount();
+      enqueueJob(() => component.onUnmounted());
       break;
     }
 

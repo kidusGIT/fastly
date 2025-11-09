@@ -43,6 +43,10 @@ export class Component {
     autoBind(this);
   }
 
+  onMounted() {}
+
+  onUnmounted() {}
+
   get firstElement() {
     if (this.#vdom === null) return;
 
