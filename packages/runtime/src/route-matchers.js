@@ -73,16 +73,3 @@ function extractQuery(path) {
 
   return Object.fromEntries(search.entries());
 }
-
-const d = makeRouteWithParamsRegex({ path: "/user/:id/orders/:orderId" });
-
-console.log(
-  "d.exec('/user/123/orders/456') ",
-  d.exec("/user/123/orders/4556").groups
-);
-
-// const route = { path: "/user/:id/orders/:orderId" };
-// const matcher = makeMatcherWithParams(route);
-
-// console.log(matcher.checkMatch("/user/123/orders/456")); // true
-// console.log(matcher.extractParams("/user/123/orders/456")); // { id: '123', orderId: '456' }
