@@ -96,7 +96,6 @@ function patchComponent(oldVdom, newVdom) {
 
 function patchChildren(oldVdom, newVdom, hostComponent) {
   const oldChildren = extractChildren(oldVdom);
-  const arr = oldChildren.map((child) => child);
   const newChildren = extractChildren(newVdom);
   const parentEl = oldVdom.el;
 
@@ -149,31 +148,6 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
     }
   }
 }
-
-const oldNode = createElement([
-  createElement("input", { key: 12 }),
-  createElement("p", { key: 15 }),
-  createElement("component", { key: 14 }),
-  createElement("button", { key: 16 }),
-  createElement([
-    createElement("i", { key: 5 }),
-    createElement("b", { key: 6 }),
-    createElement("j", { key: 7 }),
-  ]),
-]);
-const newNode = createElement([
-  createElement("span", { key: 12 }),
-  createElement("button", { key: 16 }),
-  createElement([
-    createElement("b", { key: 6 }),
-    createElement("j", { key: 7 }),
-  ]),
-  createElement("div", { key: 25 }),
-  createElement("button", { key: 16 }),
-  createElement("p", { key: 15 }),
-]);
-
-// patchChildren(oldNode, newNode);
 
 function patchElement(oldVdom, newVdom) {
   const el = oldVdom.el;
